@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import os
 from Tools import Data
+
 def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       bi = pd.read_csv(file_immuno)
       bi.replace("NA",np.nan)

@@ -403,10 +403,11 @@ class Feature_Boruta(BaseEstimator,TransformerMixin):
         return x[self.col].copy()
     
 class Feature_SVM_RFE(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
+    def __init__(self,immune_col,n_jobs = 15,outcv=3,incv = 5,seed = 0):
         self.immune_col = immune_col
         self.n_jobs = n_jobs
-        self.cv = cv
+        self.outcv = outcv
+        self.incv = incv
         self.seed = seed
         
     def fit(self, x,y):
@@ -418,9 +419,9 @@ class Feature_SVM_RFE(BaseEstimator,TransformerMixin):
             for c in col:
                 if c not in self.immune_col:
                     del x_[c]
-        comp = get_hyper_SVM(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs,line=True)
+        comp = get_hyper_SVM(x_, y,seed=self.seed,cv=self.incv,n_jobs=self.n_jobs,line=True)
         model = SVC(C=comp["c"],gamma=comp["gamma"],kernel=comp["kernel"],class_weight="balanced",probability=True)
-        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
+        bo = RFECV(model, step=2, cv=StratifiedKFold(self.outcv,random_state=self.seed,shuffle=True),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
         print("RF-RFE")
         bo.fit(np.array(x_), np.array(y))
         col =list(x.columns)
