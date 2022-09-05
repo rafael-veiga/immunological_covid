@@ -229,6 +229,368 @@ class Data:
                 
 
             
+
+
+class Remove__col_NA(BaseEstimator,TransformerMixin):
+    def __init__(self, percentage_of_NA=20):
+        self.percentage_of_NA = percentage_of_NA
+    
+    def fit(self, x,y = None):        
+        return self
+    
+    def transform(self, x,y=None):
+        x_ = x.copy()
+        total = round(len(x_)*(self.percentage_of_NA/100))
+        for c in x_.columns:
+            if x_[c].isnull().sum() >=total:
+                del x_[c]
+        return x_.copy()
+
+class Imputation(BaseEstimator,TransformerMixin):
+    def __init__(self,immune_col,max_iter=100,random_state=0,tol = 0.02):
+        self.immune_col = immune_col
+        self.max_iter =max_iter
+        self.random_state = random_state
+        self.tol=tol
+        
+    def fit(self, x,y = None):
+        print("imputation")
+        x_ = x.copy()
+        col = list(x.columns)
+        for c in col:
+            if c not in self.immune_col:
+                del x_[c]
+        lr = LinearRegression()
+        imp = IterativeImputer(estimator=lr,missing_values=np.nan, max_iter=self.max_iter, verbose=0,tol = self.tol ,imputation_order='ascending',random_state=self.random_state)
+        imp.fit(x_)
+        self.imp = imp        
+        return self
+    def transform(self, x,y=None):
+        x_ = x.copy()
+        x = x.copy()
+        col = list(x.columns)
+        for c in col:
+            if c not in self.immune_col:
+                del x_[c]
+        aux = self.imp.transform(x_)
+        col = list(x_.columns)
+        for c in range(len(col)):
+            x[col[c]] = aux[:,c] 
+        return x
+     
+
+
+class Imputation_mean(BaseEstimator,TransformerMixin):
+    def __init__(self,random_state=0):
+        self.random_state = random_state
+        
+        
+    def fit(self, x,y = None):
+        x_ = x.copy()
+        self.imp = SimpleImputer()
+        self.imp.fit(x_)
+        return self
+    def transform(self, x,y=None):
+        x_ = x.copy()
+        x_2 = self.imp.transform(x_)
+        for i in range(len(x_.columns)):
+            x_.iloc[:,i] = x_2[:,i]
+        return x_.copy()
+
+
+class Standart(BaseEstimator,TransformerMixin):
+    def __init__(self,random_state=0):
+        self.random_state = random_state
+        
+        
+    def fit(self, x,y = None):
+        x_ = x.copy()
+        self.std = StandardScaler()
+        self.std.fit(x_)
+        return self
+    def transform(self, x,y=None):
+        x_ = x.copy()
+        x_2 = self.std.transform(x_)
+        for i in range(len(x_.columns)):
+            x_.iloc[:,i] = x_2[:,i]
+        return x_.copy()
+
+class Dicretization(BaseEstimator,TransformerMixin):
+    def __init__(self,immune_col):
+        self.immune_col = immune_col
+        
+        
+    def fit(self, x,y):
+        print("Dicotomize")
+        mape = {}
+        for v in self.immune_col:
+            x_ = x.copy()
+            y_ = y.copy()
+            y_ = y_[~x_[v].isna()]
+            x_ = x_[~x_[v].isna()]
+            x_ = x_[v].to_frame()  
+            tree_model = DecisionTreeClassifier(max_leaf_nodes=3,criterion="entropy")
+            tree_model.fit(x_, y_)
+            a=tree_model.predict_proba(x_)[:,1]
+            x_["bins"] = a
+            x_ = x_.sort_values(by=v)
+            prob = x_["bins"].iloc[0]
+            cut = []
+            x_["bin2"] = 2
+            for i in range(1,len(x_.index)):
+                if x_["bins"].iloc[i] != prob:
+                    prob = x_["bins"].iloc[i]
+                    cut.append(x_[v].iloc[i-1])
+            mape[v] = cut
+        self.mape = mape
+        return self
+    
+    def transform(self, x,y=None):
+        x_ = x.copy()
+        for v in self.immune_col:
+            cut = self.mape[v]
+            if len(cut)==2:
+                x_["bin2"] = 2
+                x_.loc[x_[v].isna(),"bin2"] = np.nan
+                x_.loc[x_[v]<=cut[1],"bin2"] = 1
+                x_.loc[x_[v]<=cut[0],"bin2"] = 0
+            if len(cut)==1:
+                x_["bin2"] = 1
+                x_.loc[x_[v].isna(),"bin2"] = np.na
+                x_.loc[x_[v]<=cut[0],"bin2"] = 0
+            x_[v] = x_["bin2"]
+            del x_["bin2"]
+            x_ = x_.copy()
+            x_[v] = x_[v].astype('category')
+        return x_
+    def get_mapa(self):
+        cut = []
+        for v in self.immune_col:
+            cut.append(self.mape[v])
+        return pd.DataFrame({"var":self.immune_col,"cutof":cut})
+    
+
+class Feature_Boruta(BaseEstimator,TransformerMixin):
+    def __init__(self,immune_col,tol=100,n_jobs = 15,cv=3,seed = 0):
+        self.immune_col = immune_col
+        self.n_jobs = n_jobs
+        self.tol = tol
+        self.cv = cv
+        self.seed = seed
+        
+    def fit(self, x,y):
+        print("Feature selection")
+        x_ = x.copy()
+        x = x.copy()
+        col = list(x_.columns)
+        if not self.immune_col==None:
+            for c in col:
+                if c not in self.immune_col:
+                    del x_[c]
+        comp = get_hyper_RF(x_, y,seed=self.seed,cv=self.cv)
+        rf = RandomForestClassifier(n_estimators=4001,max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.seed,class_weight="balanced_subsample",n_jobs=self.n_jobs)
+        bo = BorutaPy(rf, n_estimators=4001, verbose=0, random_state=self.seed,perc = self.tol)
+        print("Boruta")
+        bo.fit(np.array(x_), np.array(y))
+        col =list(x.columns)
+        for i in range(len(x_.columns)):
+            if bo.support_[i]==False:
+                col.remove(list(x_.columns)[i])
+        self.col = col
+        return self
+    
+    def transform(self, x,y=None):
+        return x[self.col].copy()
+    
+class Feature_SVM_RFE(BaseEstimator,TransformerMixin):
+    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
+        self.immune_col = immune_col
+        self.n_jobs = n_jobs
+        self.cv = cv
+        self.seed = seed
+        
+    def fit(self, x,y):
+        print("Feature selection")
+        x_ = x.copy()
+        x = x.copy()
+        col = list(x_.columns)
+        if not self.immune_col==None:
+            for c in col:
+                if c not in self.immune_col:
+                    del x_[c]
+        comp = get_hyper_SVM(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs,line=True)
+        model = SVC(C=comp["c"],gamma=comp["gamma"],kernel=comp["kernel"],class_weight="balanced",probability=True)
+        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
+        print("RF-RFE")
+        bo.fit(np.array(x_), np.array(y))
+        col =list(x.columns)
+        for i in range(len(x_.columns)):
+            if bo.support_[i]==False:
+                col.remove(list(x_.columns)[i])
+        self.col = col
+        self.bo=bo
+        return self
+    
+    def transform(self, x,y=None):
+        return x[self.col].copy()
+
+class Feature_RF_RFE(BaseEstimator,TransformerMixin):
+    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
+        self.immune_col = immune_col
+        self.n_jobs = n_jobs
+        self.cv = cv
+        self.seed = seed
+        
+    def fit(self, x,y):
+        print("Feature selection")
+        x_ = x.copy()
+        x = x.copy()
+        col = list(x_.columns)
+        if not self.immune_col==None:
+            for c in col:
+                if c not in self.immune_col:
+                    del x_[c]
+        comp = get_hyper_RF(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs)
+        model = RandomForestClassifier(n_estimators=4001,max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.seed,class_weight="balanced_subsample",n_jobs=self.n_jobs)
+        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
+        print("RF-RFE")
+        bo.fit(np.array(x_), np.array(y))
+        col =list(x.columns)
+        for i in range(len(x_.columns)):
+            if bo.support_[i]==False:
+                col.remove(list(x_.columns)[i])
+        self.col = col
+        self.bo = bo
+        return self
+    
+    def transform(self, x,y=None):
+        return x[self.col].copy()
+
+class Feature_GB_RFE(BaseEstimator,TransformerMixin):
+    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
+        self.immune_col = immune_col
+        self.n_jobs = n_jobs
+        self.cv = cv
+        self.seed = seed
+        
+    def fit(self, x,y):
+        print("Feature selection")
+        x_ = x.copy()
+        x = x.copy()
+        col = list(x_.columns)
+        if not self.immune_col==None:
+            for c in col:
+                if c not in self.immune_col:
+                    del x_[c]
+        comp = get_hyper_GB(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs)
+        model = GradientBoostingClassifier(n_estimators=4001,subsample=comp["subsample"],max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.seed)
+        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
+        print("GB-RFE")
+        bo.fit(np.array(x_), np.array(y))
+        col =list(x.columns)
+        for i in range(len(x_.columns)):
+            if bo.support_[i]==False:
+                col.remove(list(x_.columns)[i])
+        self.col = col
+        self.bo = bo
+        return self
+    
+    def transform(self, x,y=None):
+        return x[self.col].copy()
+
+
+class RF(ClassifierMixin,BaseEstimator):
+    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
+        self.random_state = random_state
+        self.intercv = intercv
+        self.n_jobs = n_jobs
+
+    def fit(self, x, y):
+        comp = get_hyper_RF(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv)
+        rf = RandomForestClassifier(n_estimators=4001,max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.random_state,class_weight="balanced_subsample",n_jobs=self.n_jobs)
+        rf.fit(x, y)
+        self.rf = rf
+        return self
+
+    def predict(self, x):
+        return self.rf.predict(x)
+    
+    def predict_proba(self,x):
+        return self.rf.predict_proba(x)
+    
+    def score(self,X, y, sample_weight=None):
+        return self.rf.score(X,y)    
+    
+class LR(ClassifierMixin, BaseEstimator):
+    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
+        self.random_state = random_state
+        self.intercv = intercv
+        self.n_jobs = n_jobs
+
+    def fit(self, x, y):
+        comp = get_hyper_LR(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv)
+        model = LogisticRegression(random_state=self.random_state,C=comp["c"],penalty="l1",solver="liblinear",class_weight="balanced")
+        model.fit(x, y)
+        self.model = model
+        return self
+
+    def predict(self, x):
+        self.x_test = x
+        return self.model.predict(x)
+    
+    def predict_proba(self,x):
+        return self.model.predict_proba(x)
+    
+    def decision_function(self, x):
+        return self.model.decision_function(x)[:,1]    
+    
+class GB(ClassifierMixin,BaseEstimator):
+    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
+        self.random_state = random_state
+        self.intercv = intercv
+        self.n_jobs = n_jobs
+
+    def fit(self, x, y):
+        comp = get_hyper_GB(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv)
+        model = GradientBoostingClassifier(n_estimators=4001,subsample=comp["subsample"],max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.random_state)
+        model.fit(x, y)
+        self.model = model
+        return self
+
+    def predict(self, x):
+        return self.model.predict(x)
+    
+    def predict_proba(self,x):
+        return self.model.predict_proba(x)
+    
+    def score(self,X, y, sample_weight=None):
+        return self.model.score(X,y)    
+    
+    
+class SVM(ClassifierMixin, BaseEstimator):
+    def __init__(self,random_state=0,intercv = 3,n_jobs = 15,line=False):
+        self.random_state = random_state
+        self.intercv = intercv
+        self.n_jobs = n_jobs
+        self.line=line
+
+    def fit(self, x, y):
+        comp = get_hyper_SVM(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv,line=self.line)
+        model = SVC(C=comp["c"],gamma=comp["gamma"],kernel=comp["kernel"],class_weight="balanced",probability=True)
+        model.fit(x, y)
+        self.model = model
+        return self
+
+    def predict(self, x):
+        self.x_test = x
+        return self.model.predict(x)
+    
+    def predict_proba(self,x):
+        return self.model.predict_proba(x)
+    
+    def decision_function(self, x):
+        return self.model.decision_function(x)[:,1]
+
 def feature_selector_boruta(immune_col,d2_d,d3_d,d3_p,seed=0,n_jobs=15,per = 100):
     x_d2_d = d2_d.copy()
     y_d2_d = d2_d.d2_d.copy()
@@ -743,364 +1105,3 @@ def get_hyper_SVM(x,y,seed=0,n_jobs = 15, cv=3,line=False):
         comp["gamma"] = df.iloc[0].gamma
         comp["kernel"] = df.iloc[0].kernel         
         return comp
-
-class Remove__col_NA(BaseEstimator,TransformerMixin):
-    def __init__(self, percentage_of_NA=20):
-        self.percentage_of_NA = percentage_of_NA
-    
-    def fit(self, x,y = None):        
-        return self
-    
-    def transform(self, x,y=None):
-        x_ = x.copy()
-        total = round(len(x_)*(self.percentage_of_NA/100))
-        for c in x_.columns:
-            if x_[c].isnull().sum() >=total:
-                del x_[c]
-        return x_.copy()
-
-class Imputation(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col,max_iter=100,random_state=0,tol = 0.02):
-        self.immune_col = immune_col
-        self.max_iter =max_iter
-        self.random_state = random_state
-        self.tol=tol
-        
-    def fit(self, x,y = None):
-        print("imputation")
-        x_ = x.copy()
-        col = list(x.columns)
-        for c in col:
-            if c not in self.immune_col:
-                del x_[c]
-        lr = LinearRegression()
-        imp = IterativeImputer(estimator=lr,missing_values=np.nan, max_iter=self.max_iter, verbose=0,tol = self.tol ,imputation_order='ascending',random_state=self.random_state)
-        imp.fit(x_)
-        self.imp = imp        
-        return self
-    def transform(self, x,y=None):
-        x_ = x.copy()
-        x = x.copy()
-        col = list(x.columns)
-        for c in col:
-            if c not in self.immune_col:
-                del x_[c]
-        aux = self.imp.transform(x_)
-        col = list(x_.columns)
-        for c in range(len(col)):
-            x[col[c]] = aux[:,c] 
-        return x
-     
-
-
-class Imputation_mean(BaseEstimator,TransformerMixin):
-    def __init__(self,random_state=0):
-        self.random_state = random_state
-        
-        
-    def fit(self, x,y = None):
-        x_ = x.copy()
-        self.imp = SimpleImputer()
-        self.imp.fit(x_)
-        return self
-    def transform(self, x,y=None):
-        x_ = x.copy()
-        x_2 = self.imp.transform(x_)
-        for i in range(len(x_.columns)):
-            x_.iloc[:,i] = x_2[:,i]
-        return x_.copy()
-
-
-class Standart(BaseEstimator,TransformerMixin):
-    def __init__(self,random_state=0):
-        self.random_state = random_state
-        
-        
-    def fit(self, x,y = None):
-        x_ = x.copy()
-        self.std = StandardScaler()
-        self.std.fit(x_)
-        return self
-    def transform(self, x,y=None):
-        x_ = x.copy()
-        x_2 = self.std.transform(x_)
-        for i in range(len(x_.columns)):
-            x_.iloc[:,i] = x_2[:,i]
-        return x_.copy()
-
-class Dicretization(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col):
-        self.immune_col = immune_col
-        
-        
-    def fit(self, x,y):
-        print("Dicotomize")
-        mape = {}
-        for v in self.immune_col:
-            x_ = x.copy()
-            y_ = y.copy()
-            y_ = y_[~x_[v].isna()]
-            x_ = x_[~x_[v].isna()]
-            x_ = x_[v].to_frame()  
-            tree_model = DecisionTreeClassifier(max_leaf_nodes=3,criterion="entropy")
-            tree_model.fit(x_, y_)
-            a=tree_model.predict_proba(x_)[:,1]
-            x_["bins"] = a
-            x_ = x_.sort_values(by=v)
-            prob = x_["bins"].iloc[0]
-            cut = []
-            x_["bin2"] = 2
-            for i in range(1,len(x_.index)):
-                if x_["bins"].iloc[i] != prob:
-                    prob = x_["bins"].iloc[i]
-                    cut.append(x_[v].iloc[i-1])
-            mape[v] = cut
-        self.mape = mape
-        return self
-    
-    def transform(self, x,y=None):
-        x_ = x.copy()
-        for v in self.immune_col:
-            cut = self.mape[v]
-            if len(cut)==2:
-                x_["bin2"] = 2
-                x_.loc[x_[v].isna(),"bin2"] = np.nan
-                x_.loc[x_[v]<=cut[1],"bin2"] = 1
-                x_.loc[x_[v]<=cut[0],"bin2"] = 0
-            if len(cut)==1:
-                x_["bin2"] = 1
-                x_.loc[x_[v].isna(),"bin2"] = np.na
-                x_.loc[x_[v]<=cut[0],"bin2"] = 0
-            x_[v] = x_["bin2"]
-            del x_["bin2"]
-            x_ = x_.copy()
-            x_[v] = x_[v].astype('category')
-        return x_
-    def get_mapa(self):
-        cut = []
-        for v in self.immune_col:
-            cut.append(self.mape[v])
-        return pd.DataFrame({"var":self.immune_col,"cutof":cut})
-    
-
-class Feature_Boruta(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col,tol=100,n_jobs = 15,cv=3,seed = 0):
-        self.immune_col = immune_col
-        self.n_jobs = n_jobs
-        self.tol = tol
-        self.cv = cv
-        self.seed = seed
-        
-    def fit(self, x,y):
-        print("Feature selection")
-        x_ = x.copy()
-        x = x.copy()
-        col = list(x_.columns)
-        if not self.immune_col==None:
-            for c in col:
-                if c not in self.immune_col:
-                    del x_[c]
-        comp = get_hyper_RF(x_, y,seed=self.seed,cv=self.cv)
-        rf = RandomForestClassifier(n_estimators=4001,max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.seed,class_weight="balanced_subsample",n_jobs=self.n_jobs)
-        bo = BorutaPy(rf, n_estimators=4001, verbose=0, random_state=self.seed,perc = self.tol)
-        print("Boruta")
-        bo.fit(np.array(x_), np.array(y))
-        col =list(x.columns)
-        for i in range(len(x_.columns)):
-            if bo.support_[i]==False:
-                col.remove(list(x_.columns)[i])
-        self.col = col
-        return self
-    
-    def transform(self, x,y=None):
-        return x[self.col].copy()
-    
-class Feature_SVM_RFE(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
-        self.immune_col = immune_col
-        self.n_jobs = n_jobs
-        self.cv = cv
-        self.seed = seed
-        
-    def fit(self, x,y):
-        print("Feature selection")
-        x_ = x.copy()
-        x = x.copy()
-        col = list(x_.columns)
-        if not self.immune_col==None:
-            for c in col:
-                if c not in self.immune_col:
-                    del x_[c]
-        comp = get_hyper_SVM(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs,line=True)
-        model = SVC(C=comp["c"],gamma=comp["gamma"],kernel=comp["kernel"],class_weight="balanced",probability=True)
-        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
-        print("RF-RFE")
-        bo.fit(np.array(x_), np.array(y))
-        col =list(x.columns)
-        for i in range(len(x_.columns)):
-            if bo.support_[i]==False:
-                col.remove(list(x_.columns)[i])
-        self.col = col
-        self.bo=bo
-        return self
-    
-    def transform(self, x,y=None):
-        return x[self.col].copy()
-
-class Feature_RF_RFE(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
-        self.immune_col = immune_col
-        self.n_jobs = n_jobs
-        self.cv = cv
-        self.seed = seed
-        
-    def fit(self, x,y):
-        print("Feature selection")
-        x_ = x.copy()
-        x = x.copy()
-        col = list(x_.columns)
-        if not self.immune_col==None:
-            for c in col:
-                if c not in self.immune_col:
-                    del x_[c]
-        comp = get_hyper_RF(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs)
-        model = RandomForestClassifier(n_estimators=4001,max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.seed,class_weight="balanced_subsample",n_jobs=self.n_jobs)
-        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
-        print("RF-RFE")
-        bo.fit(np.array(x_), np.array(y))
-        col =list(x.columns)
-        for i in range(len(x_.columns)):
-            if bo.support_[i]==False:
-                col.remove(list(x_.columns)[i])
-        self.col = col
-        self.bo = bo
-        return self
-    
-    def transform(self, x,y=None):
-        return x[self.col].copy()
-
-class Feature_GB_RFE(BaseEstimator,TransformerMixin):
-    def __init__(self,immune_col,n_jobs = 15,cv=3,seed = 0):
-        self.immune_col = immune_col
-        self.n_jobs = n_jobs
-        self.cv = cv
-        self.seed = seed
-        
-    def fit(self, x,y):
-        print("Feature selection")
-        x_ = x.copy()
-        x = x.copy()
-        col = list(x_.columns)
-        if not self.immune_col==None:
-            for c in col:
-                if c not in self.immune_col:
-                    del x_[c]
-        comp = get_hyper_GB(x_, y,seed=self.seed,cv=self.cv,n_jobs=self.n_jobs)
-        model = GradientBoostingClassifier(n_estimators=4001,subsample=comp["subsample"],max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.seed)
-        bo = RFECV(model, step=2, cv=StratifiedKFold(10),scoring='roc_auc',verbose=3,n_jobs=self.n_jobs)
-        print("GB-RFE")
-        bo.fit(np.array(x_), np.array(y))
-        col =list(x.columns)
-        for i in range(len(x_.columns)):
-            if bo.support_[i]==False:
-                col.remove(list(x_.columns)[i])
-        self.col = col
-        self.bo = bo
-        return self
-    
-    def transform(self, x,y=None):
-        return x[self.col].copy()
-
-
-class RF(ClassifierMixin,BaseEstimator):
-    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
-        self.random_state = random_state
-        self.intercv = intercv
-        self.n_jobs = n_jobs
-
-    def fit(self, x, y):
-        comp = get_hyper_RF(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv)
-        rf = RandomForestClassifier(n_estimators=4001,max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.random_state,class_weight="balanced_subsample",n_jobs=self.n_jobs)
-        rf.fit(x, y)
-        self.rf = rf
-        return self
-
-    def predict(self, x):
-        return self.rf.predict(x)
-    
-    def predict_proba(self,x):
-        return self.rf.predict_proba(x)
-    
-    def score(self,X, y, sample_weight=None):
-        return self.rf.score(X,y)    
-    
-class LR(ClassifierMixin, BaseEstimator):
-    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
-        self.random_state = random_state
-        self.intercv = intercv
-        self.n_jobs = n_jobs
-
-    def fit(self, x, y):
-        comp = get_hyper_LR(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv)
-        model = LogisticRegression(random_state=self.random_state,C=comp["c"],penalty="l1",solver="liblinear",class_weight="balanced")
-        model.fit(x, y)
-        self.model = model
-        return self
-
-    def predict(self, x):
-        self.x_test = x
-        return self.model.predict(x)
-    
-    def predict_proba(self,x):
-        return self.model.predict_proba(x)
-    
-    def decision_function(self, x):
-        return self.model.decision_function(x)[:,1]    
-    
-class GB(ClassifierMixin,BaseEstimator):
-    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
-        self.random_state = random_state
-        self.intercv = intercv
-        self.n_jobs = n_jobs
-
-    def fit(self, x, y):
-        comp = get_hyper_GB(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv)
-        model = GradientBoostingClassifier(n_estimators=4001,subsample=comp["subsample"],max_features=comp["max_features"],max_depth=comp["max_depth"],random_state=self.random_state)
-        model.fit(x, y)
-        self.model = model
-        return self
-
-    def predict(self, x):
-        return self.model.predict(x)
-    
-    def predict_proba(self,x):
-        return self.model.predict_proba(x)
-    
-    def score(self,X, y, sample_weight=None):
-        return self.model.score(X,y)    
-    
-    
-class SVM(ClassifierMixin, BaseEstimator):
-    def __init__(self,random_state=0,intercv = 3,n_jobs = 15,line=False):
-        self.random_state = random_state
-        self.intercv = intercv
-        self.n_jobs = n_jobs
-        self.line=line
-
-    def fit(self, x, y):
-        comp = get_hyper_SVM(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv,line=self.line)
-        model = SVC(C=comp["c"],gamma=comp["gamma"],kernel=comp["kernel"],class_weight="balanced",probability=True)
-        model.fit(x, y)
-        self.model = model
-        return self
-
-    def predict(self, x):
-        self.x_test = x
-        return self.model.predict(x)
-    
-    def predict_proba(self,x):
-        return self.model.predict_proba(x)
-    
-    def decision_function(self, x):
-        return self.model.decision_function(x)[:,1]
-
