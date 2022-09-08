@@ -5,7 +5,8 @@ Created on Wed May 11 10:16:16 2022
 @author: valenter
 """
 
-from Tools import Data,Remove__col_NA,Imputation_mean,Standart
+from Tools import Data
+import numpy as np
 import pickle as pk
 import os
 seed = 123571113
@@ -23,10 +24,10 @@ data = data[(data.type=="k")|(data.type=="l") ]
 data.to_csv(fold + "/data_aux/table2.csv",index=False)
 
 
-# Figs 1 and 2
-
+#ML, fig 1, fig 2
 # load data
 data = Data()
+fold = os.getcwd()
 data.load(fold + "/data_aux/banco_immune.dat")
     
 ## select kidney and lung patients
@@ -105,91 +106,112 @@ del d3_d["d3_p"]
 del d3_p["d3_d"]
 del d3_p["d2_d"]
 
+
+
+
 comp = {"d2_d":d2_d,"d3_d":d3_d,"d3_p":d3_p,"immune_col":immune_col}
 file = open(fold + "/data_aux/immune_clean_a1.pkl","wb")
 pk.dump(comp,file)
 file.close()
 
-#ML fig 3, 6
-x_d2_d = d2_d[["age","sex","tx_time","type"]+immune_col].copy()
-y_d2_d = d2_d["d2_d"].copy()
-x_d3_d = d3_d[["age","sex","tx_time","type"]+immune_col].copy()
-y_d3_d = d3_d["d3_d"].copy()
-re = Remove__col_NA(percentage_of_NA=20)
-x_d2_d = re.fit_transform(x_d2_d)
-immune_col_d2_d = immune_col.copy()
-for c in immune_col:
-    if not c in x_d2_d.columns:
-        immune_col_d2_d.remove(c)
-x_d3_d = re.fit_transform(x_d3_d)
-immune_col_d3_d = immune_col.copy()
-for c in immune_col:
-    if not c in x_d3_d.columns:
-        immune_col_d3_d.remove(c)
-#imputation
-imp = Imputation_mean()
-x_d2_d = imp.fit_transform(x_d2_d)
-x_d3_d = imp.fit_transform(x_d3_d)
-#stantartization
-std =  Standart()
-x_d2_d = std.fit_transform(x_d2_d)
-x_d3_d = std.fit_transform(x_d3_d)
-comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,"immune_col_d2_d":immune_col_d2_d,"immune_col_d3_d":immune_col_d3_d,
-        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d}
-file = open(fold + "/data_aux/immune_clean_ml.pkl","wb")
-pk.dump(comp,file)
-file.close()
-
-# Fig 5
+#fig 3
 # load data
 data = Data()
 fold = os.getcwd()
-data.load(fold + "/data_aux/banco_immune.dat")  
+data.load(fold + "/data_aux/banco_immune.dat")
+    
+## select kidney and lung patients
 banco = data._Data__data
+fil = (banco.type=="k")|(banco.type=="l") |(banco.type=="i")
+data.filter_sample(fil)
 meta = data.get_col_name(modo="type",key="meta")
 median = data.get_col_name(modo="type",key="median")
 proportion = data.get_col_name(modo="type",key="proportion")
 banco = data._Data__data.copy()
+
+
+print("immune total var: "+str(len(median + proportion)))
+
 immune_col = median + proportion
+
 ## add age, sex, type and outcome
-tp = []
-d2_d = []
-d3_d = []
-d3_p = []
+
+
+gr_d2 = []
+gr_d3 = []
+
 meta = Data()
 meta.load(fold + "/data_aux/banco_meta.dat")
-col = ["Sample","type","D2_detect","D3_detect","D3_pos"]
+
+col = ["Sample","age","sex","type","tx_time","D2_detect","D3_detect"]
 meta = meta.get_dataset(cols=col)
 sam = list(data.get_dataset(cols=["Sample"]).Sample)
 for s in sam:
-    tp.append(list(meta.loc[meta.Sample==s].type)[0])
-    d2_d.append(list(meta.loc[meta.Sample==s].D2_detect)[0])
-    d3_d.append(list(meta.loc[meta.Sample==s].D3_detect)[0])
-    d3_p.append(list(meta.loc[meta.Sample==s].D3_pos)[0])
-data.add_var(tp, "type", "meta")
-data.add_var(d2_d, "d2_d", "outcome")
-data.add_var(d3_d, "d3_d", "outcome")
-data.add_var(d3_p, "d3_p", "outcome")
+    if meta.loc[meta.Sample==s].type.iloc[0] =="i":
+        gr_d2.append("h")
+        gr_d3.append("h")
+    else:
+        if meta.loc[meta.Sample==s].D2_detect.iloc[0] ==1:
+            gr_d2.append("d")
+        elif meta.loc[meta.Sample==s].D2_detect.iloc[0] ==0:
+            gr_d2.append("n")
+        else:
+            gr_d2.append(np.nan)
+        
+        if meta.loc[meta.Sample==s].D3_detect.iloc[0] ==1:
+            gr_d3.append("d")
+        elif meta.loc[meta.Sample==s].D3_detect.iloc[0] ==0:
+            gr_d3.append("n")
+        else:
+            gr_d3.append(np.nan)
+            
+
+
+data.add_var(gr_d2, "gr_d2", "outcome")
+data.add_var(gr_d3, "gr_d3", "outcome")
 
 banco = data.get_dataset()
 d2_d = banco.copy()
 d3_d = banco.copy()
 d3_p = banco.copy()
-d2_d = d2_d[~d2_d.d2_d.isna()]
-d3_d = d3_d[~d3_d.d3_d.isna()]
-d3_p = d3_p[~d3_p.d3_p.isna()]
+d2_d = d2_d[~d2_d.gr_d2.isna()]
+d3_d = d3_d[~d3_d.gr_d3.isna()]
+
 #d2_d["d2_d"] = d2_d["d2_d"].astype('category')
-del d2_d["d3_d"]
-del d2_d["d3_p"]
-#d3_d["d3_d"] = d3_d["d3_d"].astype('category')
-del d3_d["d2_d"]
-del d3_d["d3_p"]
-#d3_p["d3_p"] = d3_p["d3_p"].astype('category')
-del d3_p["d3_d"]
-del d3_p["d2_d"]
+del d2_d["gr_d3"]
+del d3_d["gr_d2"]
 
-d2_d.to_csv(fold + "/data_aux/heat_1.csv",index=False)
-d3_d.to_csv(fold + "/data_aux/heat_2.csv",index=False)
+x_d2_d = d2_d[immune_col].copy()
+y_d2_d = d2_d.gr_d2.copy()
+
+x_d3_d = d3_d[immune_col].copy()
+y_d3_d = d3_d.gr_d3.copy()
+
+#######################
+#remove na
+re = Remove__col_NA(percentage_of_NA=20)
+x_d2_d = re.fit_transform(x_d2_d)
+
+x_d3_d = re.fit_transform(x_d3_d)
+
+#################################
+#imputation
+imp = Imputation_mean()
+x_d2_d = imp.fit_transform(x_d2_d)
+x_d3_d = imp.fit_transform(x_d3_d)
 
 
+##############################################################
+#stantartization
+std =   Standart()
+x_d2_d = std.fit_transform(x_d2_d)
+x_d3_d = std.fit_transform(x_d3_d)
+##############################################################
 
+comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,
+        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,
+        }
+
+file = open(fold + "/data_aux/immune_clean_a2.pkl","wb")
+pk.dump(comp,file)
+file.close()
