@@ -318,12 +318,12 @@ class Standart(BaseEstimator,TransformerMixin):
 class Dicretization(BaseEstimator,TransformerMixin):
     def __init__(self,immune_col):
         self.immune_col = immune_col
-        
-        
+    
     def fit(self, x,y):
-        print("Dicotomize")
+        print("Dicretization")
         mape = {}
         for v in self.immune_col:
+            print(v)
             x_ = x.copy()
             y_ = y.copy()
             y_ = y_[~x_[v].isna()]

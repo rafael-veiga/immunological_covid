@@ -5,7 +5,7 @@ Created on Wed May 11 10:16:16 2022
 @author: valenter
 """
 
-from Tools import Data
+from Tools import Data,Remove__col_NA,Imputation_mean,Standart
 import numpy as np
 import pickle as pk
 import os
