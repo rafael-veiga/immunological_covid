@@ -5,7 +5,7 @@ Created on Wed May 11 10:16:16 2022
 @author: valenter
 """
 
-from Tools import Data,Remove__col_NA,Imputation_mean,Standart
+from Tools import Data,Remove__col_NA,Imputation_mean,Standart,Imputation,Remove__Outliers
 import numpy as np
 import pickle as pk
 import os
@@ -137,68 +137,99 @@ immune_col = median + proportion
 ## add age, sex, type and outcome
 
 
-gr_d2 = []
-gr_d3 = []
+gr_d2_d = []
+gr_d3_d = []
+gr_d3_p = []
 
 meta = Data()
 meta.load(fold + "/data_aux/banco_meta.dat")
 
-col = ["Sample","age","sex","type","tx_time","D2_detect","D3_detect"]
+col = ["Sample","age","sex","type","tx_time","D2_detect","D3_detect","D3_pos"]
 meta = meta.get_dataset(cols=col)
+
 sam = list(data.get_dataset(cols=["Sample"]).Sample)
 for s in sam:
     if meta.loc[meta.Sample==s].type.iloc[0] =="i":
-        gr_d2.append("h")
-        gr_d3.append("h")
+        gr_d2_d.append("h")
+        gr_d3_d.append("h")
+        gr_d3_p.append("h")
     else:
         if meta.loc[meta.Sample==s].D2_detect.iloc[0] ==1:
-            gr_d2.append("d")
+            gr_d2_d.append("d")
         elif meta.loc[meta.Sample==s].D2_detect.iloc[0] ==0:
-            gr_d2.append("n")
+            gr_d2_d.append("n")
         else:
-            gr_d2.append(np.nan)
+            gr_d2_d.append(np.nan)
         
         if meta.loc[meta.Sample==s].D3_detect.iloc[0] ==1:
-            gr_d3.append("d")
+            gr_d3_d.append("d")
         elif meta.loc[meta.Sample==s].D3_detect.iloc[0] ==0:
-            gr_d3.append("n")
+            gr_d3_d.append("n")
         else:
-            gr_d3.append(np.nan)
+            gr_d3_d.append(np.nan)
+            
+        if meta.loc[meta.Sample==s].D3_pos.iloc[0] ==1:
+            gr_d3_p.append("d")
+        elif meta.loc[meta.Sample==s].D3_pos.iloc[0] ==0:
+            gr_d3_p.append("n")
+        else:
+            gr_d3_p.append(np.nan)
             
 
 
-data.add_var(gr_d2, "gr_d2", "outcome")
-data.add_var(gr_d3, "gr_d3", "outcome")
+data.add_var(gr_d2_d, "gr_d2_d", "outcome")
+data.add_var(gr_d3_d, "gr_d3_d", "outcome")
+data.add_var(gr_d3_p, "gr_d3_p", "outcome")
 
 banco = data.get_dataset()
 d2_d = banco.copy()
 d3_d = banco.copy()
 d3_p = banco.copy()
-d2_d = d2_d[~d2_d.gr_d2.isna()]
-d3_d = d3_d[~d3_d.gr_d3.isna()]
+d2_d = d2_d[~d2_d.gr_d2_d.isna()]
+d3_d = d3_d[~d3_d.gr_d3_d.isna()]
+d3_p = d3_p[~d3_p.gr_d3_p.isna()]
 
 #d2_d["d2_d"] = d2_d["d2_d"].astype('category')
-del d2_d["gr_d3"]
-del d3_d["gr_d2"]
+del d2_d["gr_d3_d"]
+del d2_d["gr_d3_p"]
+
+del d3_d["gr_d2_d"]
+del d3_d["gr_d3_p"]
+
+del d3_p["gr_d2_d"]
+del d3_p["gr_d3_d"]
+
+#d2_d = d2_d.loc[d2_d["batch"]==2,:]
+#d3_d = d3_d.loc[d3_d["batch"]==2,:]
 
 x_d2_d = d2_d[immune_col].copy()
-y_d2_d = d2_d.gr_d2.copy()
+y_d2_d = d2_d.gr_d2_d.copy()
 
 x_d3_d = d3_d[immune_col].copy()
-y_d3_d = d3_d.gr_d3.copy()
+y_d3_d = d3_d.gr_d3_d.copy()
+
+x_d3_p = d3_p[immune_col].copy()
+y_d3_p = d3_p.gr_d3_p.copy()
 
 #######################
 #remove na
-re = Remove__col_NA(percentage_of_NA=20)
-x_d2_d = re.fit_transform(x_d2_d)
-
-x_d3_d = re.fit_transform(x_d3_d)
-
+# re = Remove__col_NA(percentage_of_NA=20)
+# x_d2_d = re.fit_transform(x_d2_d)
+# x_d3_d = re.fit_transform(x_d3_d)
+# x_d3_p = re.fit_transform(x_d3_p)
+#####################################
+# remove outliers
+# re = Remove__Outliers(std=3)
+# x_d2_d = re.fit_transform(x_d2_d)
+# x_d3_d = re.fit_transform(x_d3_d)
+# x_d3_p = re.fit_transform(x_d3_p)
 #################################
 #imputation
 imp = Imputation_mean()
-x_d2_d = imp.fit_transform(x_d2_d)
+#imp = Imputation(immune_col=immune_col)
+x_d2_d = imp.fit_transform(x_d2_d,)
 x_d3_d = imp.fit_transform(x_d3_d)
+x_d3_p = imp.fit_transform(x_d3_p)
 
 
 ##############################################################
@@ -206,10 +237,11 @@ x_d3_d = imp.fit_transform(x_d3_d)
 std =   Standart()
 x_d2_d = std.fit_transform(x_d2_d)
 x_d3_d = std.fit_transform(x_d3_d)
+x_d3_p = std.fit_transform(x_d3_p)
 ##############################################################
 
-comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,
-        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,
+comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,"x_d3_p":x_d3_p,
+        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,"y_d3_p":y_d3_p
         }
 
 file = open(fold + "/data_aux/immune_clean_a2.pkl","wb")

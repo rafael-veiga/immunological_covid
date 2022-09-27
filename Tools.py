@@ -245,6 +245,23 @@ class Remove__col_NA(BaseEstimator,TransformerMixin):
             if x_[c].isnull().sum() >=total:
                 del x_[c]
         return x_.copy()
+    
+class Remove__Outliers(BaseEstimator,TransformerMixin):
+    def __init__(self, std=3):
+        self.std = std
+    
+    def fit(self, x,y = None):        
+        return self
+    
+    def transform(self, x,y=None):
+        x_ = x.copy()
+        
+        for c in x_.columns:
+            lim_s = np.mean(x_[c]) + np.std(x_[c])*self.std
+            lim_i = np.mean(x_[c]) - np.std(x_[c])*self.std
+            x_.loc[x_[c]>lim_s,c] = lim_s
+            x_.loc[x_[c]<lim_i,c] = lim_i
+        return x_.copy()
 
 class Imputation(BaseEstimator,TransformerMixin):
     def __init__(self,immune_col,max_iter=100,random_state=0,tol = 0.02):
@@ -323,7 +340,6 @@ class Dicretization(BaseEstimator,TransformerMixin):
         print("Dicretization")
         mape = {}
         for v in self.immune_col:
-            print(v)
             x_ = x.copy()
             y_ = y.copy()
             y_ = y_[~x_[v].isna()]
