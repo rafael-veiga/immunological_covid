@@ -199,6 +199,11 @@ del d3_d["gr_d3_p"]
 del d3_p["gr_d2_d"]
 del d3_p["gr_d3_d"]
 
+comp = {"d2_d":d2_d,"d3_d":d3_d,"d3_p":d3_p}
+file = open(fold + "/data_aux/immune_clean_a3.pkl","wb")
+pk.dump(comp,file)
+file.close()
+
 #d2_d = d2_d.loc[d2_d["batch"]==2,:]
 #d3_d = d3_d.loc[d3_d["batch"]==2,:]
 

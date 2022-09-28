@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ComplexHeatmap)
 library(circlize)
+library(gridtext)
 library(dendextend)
 
 f_cor <- function(df){
@@ -39,151 +40,49 @@ f_diagonal <- function(df){
 
 colormap2 = colorRamp2(c(-2, 0, 2), c("darkolivegreen", "white", "tomato4"))
 
-d2_d = read.csv("data_aux/heat_1.csv")
-d2_d = d2_d[,0:(length(d2_d[0,])-2)]
+d2_d = read.csv("data_aux/heat_d2_d.csv")
+d3_p = read.csv("data_aux/heat_d3_p.csv")
+f = file("data_aux/heat_d2_d.csv","r")
+lin_d2_d = readLines(f,1)
+close(f)
+lin_d2_d = unlist(strsplit(lin_d2_d, ","))
+col_label_d2_d = lin_d2_d[5:14]
+col_label_d2_d = gsub(" :in: ", " in** <br>", col_label_d2_d)
+col_label_d2_d = paste0("**",col_label_d2_d )
 
-d3_d = read.csv("data_aux/heat_2.csv")
-d3_d = d3_d[,0:(length(d3_d[0,])-2)]
-
-d2_d_v = colnames(d2_d)[0:(length(colnames(d2_d))-1)]
-d3_d_v = colnames(d3_d)[0:(length(colnames(d3_d))-1)]
-#d_d2_d = 1-cor(d2_d[,colnames(d2_d)[0:(length(colnames(d2_d))-1)]],method="spearman")
-d2_d2 = read.csv("data_aux/heat_1.csv")
-d2_d2 = d2_d2[,d2_d_v]
-d3_d2 = read.csv("data_aux/heat_2.csv")
-d3_d2 = d3_d2[,d3_d_v]
-rm(d2_d_v)
-rm(d3_d_v)
-d2_d2$tp = d2_d$tp
-d3_d2$tp = d3_d$tp 
-d2_d = d2_d2
-d3_d = d3_d2
-rm(d2_d2)
-rm(d3_d2)
-
+f = file("data_aux/heat_d3_p.csv","r")
+lin_d3_p = readLines(f,1)
+close(f)
+lin_d3_p = unlist(strsplit(lin_d3_p, ","))
+col_label_d3_p = lin_d3_p[5:14]
+col_label_d3_p = gsub(" :in: ", " in** <br>", col_label_d3_p)
+col_label_d3_p = paste0("**",col_label_d3_p )
 #d2_d
-normal = d2_d[d2_d$tp=="healthy",]
-normal$tp = NULL
+normal = d2_d[d2_d$gr_d2_d=="h",]
+normal$Sample = NULL
+normal$batch = NULL
+normal$type = NULL
+normal$gr_d2_d = NULL
 c_nor = f_cor(normal)
 
-detec = d2_d[d2_d$tp=="dose 2 detectable",]
-detec$tp = NULL
+detec = d2_d[d2_d$gr_d2_d=="d",]
+detec$Sample = NULL
+detec$batch = NULL
+detec$type = NULL
+detec$gr_d2_d = NULL
 c_detec = f_cor(detec)
 comp_detect = f_comp(c_nor,c_detec)
 
-ndetec = d2_d[d2_d$tp=="dose 2 non-responders",]
-ndetec$tp = NULL
+ndetec = d2_d[d2_d$gr_d2_d=="n",]
+ndetec$Sample = NULL
+ndetec$batch = NULL
+ndetec$type = NULL
+ndetec$gr_d2_d = NULL
 c_ndetec = f_cor(ndetec)
 comp_ndetect = f_comp(c_nor,c_ndetec)
 
-col_fun = colorRamp2(c(1,0, -1), c("blue","white", "red"))
-colormap2 = colorRamp2(c(-2, 0, 2), c("darkgreen", "white", "tomato4"))
 
-dend = as.dendrogram(hclust(dist(abs(c_nor))))
-dend = color_branches(dend, k = 5)
 
-cell_fun1 <- function(j, i, x, y, width, height, fill) {
-  if(i==j){
-    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
-  }
-}
-
-cell_fun2 <- function(j, i, x, y, width, height, fill) {
-  if(i==j){
-    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
-    
-  }else if(which(order.dendrogram(dend)==i) > which(order.dendrogram(dend)==j) ) {
-    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
-    grid.circle(x = x, y = y, r = abs(comp_detect[i, j])/2 * min(unit.c(width, height)), 
-                gp = gpar(fill = colormap2(comp_detect[i, j]), col = NA))
-  } 
-}
-
-cell_fun3 <- function(j, i, x, y, width, height, fill) {
-  if(i==j){
-    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
-    
-  }else if(which(order.dendrogram(dend)==i) > which(order.dendrogram(dend)==j) ) {
-    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
-    grid.circle(x = x, y = y, r = abs(comp_ndetect[i, j])/2 * min(unit.c(width, height)), 
-                gp = gpar(fill = colormap2(comp_ndetect[i, j]), col = NA))
-  } 
-}
-## heathy
-h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
-            column_title = "Heathy",
-            column_title_side = "bottom",
-        show_row_dend = FALSE,
-        row_labels = col_label_d2_d,
-        cluster_rows = dend,
-        row_names_side = "left",
-        show_column_names = FALSE,
-        row_title = NULL,
-        row_split = 5,
-        column_split = 5,
-        row_gap = unit(2, "mm"),
-        column_gap = unit(2, "mm"),
-        border = TRUE,
-        cell_fun = cell_fun1,
-        width = unit(8, "cm"), height = unit(8, "cm"),
-        cluster_columns = dend)
-h
-##detect
-
-d = Heatmap(f_diagonal(c_detec),name="Correlation",col = col_fun,
-            column_title = "Dose 2 responders",
-            column_title_side = "bottom",
-            show_row_dend = FALSE,
-            cluster_rows = dend,
-            row_names_side = "left",
-            show_column_names = FALSE,
-            row_title = NULL,
-            row_split = 5,
-            column_split = 5,
-            row_gap = unit(2, "mm"),
-            column_gap = unit(2, "mm"),
-            border = TRUE,
-            cell_fun = cell_fun2,
-            width = unit(8, "cm"), height = unit(8, "cm"),
-            cluster_columns = dend)
-d
-##detect
-n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
-            column_title = "Dose 2 non-responders",
-            column_title_side = "bottom",
-            show_row_dend = FALSE,
-            cluster_rows = dend,
-            row_names_side = "left",
-            show_column_names = FALSE,
-            row_title = NULL,
-            row_split = 5,
-            column_split = 5,
-            row_gap = unit(2, "mm"),
-            column_gap = unit(2, "mm"),
-            border = TRUE,
-            cell_fun = cell_fun3,
-            width = unit(8, "cm"), height = unit(8, "cm"),
-            cluster_columns = dend)
-n
-lgd = Legend(col_fun = colormap2, title = "Healthy",at = c(2, 0, -2),labels = c("low", "equal", "high"))
-A =h+d+n 
-draw(A,heatmap_legend_side = "right",column_title = "A",column_title_gp = gpar(fontsize = 16))
-draw(lgd, x = unit(43, "cm"), y = unit(10, "cm"), just = c("right", "top"))
-#######################################
-#d3_d
-normal = d3_d[d3_d$tp=="healthy",]
-normal$tp = NULL
-c_nor = f_cor(normal)
-
-detec = d3_d[d3_d$tp=="dose 3 detectable",]
-detec$tp = NULL
-c_detec = f_cor(detec)
-comp_detect = f_comp(c_nor,c_detec)
-
-ndetec = d3_d[d3_d$tp=="dose 3 non-responders",]
-ndetec$tp = NULL
-c_ndetec = f_cor(ndetec)
-comp_ndetect = f_comp(c_nor,c_ndetec)
 
 col_fun = colorRamp2(c(1,0, -1), c("blue","white", "red"))
 colormap2 = colorRamp2(c(-2, 0, 2), c("darkgreen", "white", "tomato4"))
@@ -222,25 +121,26 @@ cell_fun3 <- function(j, i, x, y, width, height, fill) {
 h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
             column_title = "Heathy",
             column_title_side = "bottom",
-            show_row_dend = FALSE,
-            row_labels = col_label_d2_d,
-            cluster_rows = dend,
-            row_names_side = "left",
-            show_column_names = FALSE,
-            row_title = NULL,
-            row_split = 4,
-            column_split = 4,
-            row_gap = unit(2, "mm"),
-            column_gap = unit(2, "mm"),
-            border = TRUE,
-            cell_fun = cell_fun1,
-            width = unit(8, "cm"), height = unit(8, "cm"),
-            cluster_columns = dend)
+        show_row_dend = FALSE,
+        row_labels = gt_render(col_label_d2_d),
+        row_names_gp = grid::gpar(fontsize = 10),
+        cluster_rows = dend,
+        row_names_side = "left",
+        show_column_names = FALSE,
+        row_title = NULL,
+        row_split = 4,
+        column_split = 4,
+        row_gap = unit(2, "mm"),
+        column_gap = unit(2, "mm"),
+        border = TRUE,
+        cell_fun = cell_fun1,
+        width = unit(8, "cm"), height = unit(8, "cm"),
+        cluster_columns = dend)
 h
 ##detect
 
 d = Heatmap(f_diagonal(c_detec),name="Correlation",col = col_fun,
-            column_title = "Dose 3 responders",
+            column_title = "Dose 2 responders",
             column_title_side = "bottom",
             show_row_dend = FALSE,
             cluster_rows = dend,
@@ -258,7 +158,7 @@ d = Heatmap(f_diagonal(c_detec),name="Correlation",col = col_fun,
 d
 ##detect
 n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
-            column_title = "Dose 3 non-responders",
+            column_title = "Dose 2 non-responders",
             column_title_side = "bottom",
             show_row_dend = FALSE,
             cluster_rows = dend,
@@ -267,6 +167,125 @@ n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
             row_title = NULL,
             row_split = 4,
             column_split = 4,
+            row_gap = unit(2, "mm"),
+            column_gap = unit(2, "mm"),
+            border = TRUE,
+            cell_fun = cell_fun3,
+            width = unit(8, "cm"), height = unit(8, "cm"),
+            cluster_columns = dend)
+n
+lgd = Legend(col_fun = colormap2, title = "Healthy",at = c(2, 0, -2),labels = c("low", "equal", "high"))
+A =h+d+n 
+draw(A,heatmap_legend_side = "right",column_title = "A",column_title_gp = gpar(fontsize = 16))
+draw(lgd, x = unit(43, "cm"), y = unit(10, "cm"), just = c("right", "top"))
+#######################################
+#d3_d
+normal = d3_p[d3_p$gr_d3_p=="h",]
+normal$Sample = NULL
+normal$batch = NULL
+normal$type = NULL
+normal$gr_d3_p = NULL
+c_nor = f_cor(normal)
+
+detec = d3_p[d3_p$gr_d3_p=="d",]
+detec$Sample = NULL
+detec$batch = NULL
+detec$type = NULL
+detec$gr_d3_p = NULL
+c_detec = f_cor(detec)
+comp_detect = f_comp(c_nor,c_detec)
+
+ndetec = d3_p[d3_p$gr_d3_p=="n",]
+ndetec$Sample = NULL
+ndetec$batch = NULL
+ndetec$type = NULL
+ndetec$gr_d3_p = NULL
+c_ndetec = f_cor(ndetec)
+comp_ndetect = f_comp(c_nor,c_ndetec)
+
+col_fun = colorRamp2(c(1,0, -1), c("blue","white", "red"))
+colormap2 = colorRamp2(c(-2, 0, 2), c("darkgreen", "white", "tomato4"))
+
+dend = as.dendrogram(hclust(dist(abs(c_nor))))
+dend = color_branches(dend, k = 3)
+
+cell_fun1 <- function(j, i, x, y, width, height, fill) {
+  if(i==j){
+    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
+  }
+}
+
+cell_fun2 <- function(j, i, x, y, width, height, fill) {
+  if(i==j){
+    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
+    
+  }else if(which(order.dendrogram(dend)==i) > which(order.dendrogram(dend)==j) ) {
+    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
+    grid.circle(x = x, y = y, r = abs(comp_detect[i, j])/2 * min(unit.c(width, height)), 
+                gp = gpar(fill = colormap2(comp_detect[i, j]), col = NA))
+  } 
+}
+
+cell_fun3 <- function(j, i, x, y, width, height, fill) {
+  if(i==j){
+    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
+    
+  }else if(which(order.dendrogram(dend)==i) > which(order.dendrogram(dend)==j) ) {
+    grid.rect(x = x, y = y, width = width, height = height, gp = gpar(col = "grey", fill = "white"))
+    grid.circle(x = x, y = y, r = abs(comp_ndetect[i, j])/2 * min(unit.c(width, height)), 
+                gp = gpar(fill = colormap2(comp_ndetect[i, j]), col = NA))
+  } 
+}
+## heathy
+h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
+            column_title = "Heathy",
+            column_title_side = "bottom",
+            show_row_dend = FALSE,
+            row_labels = gt_render(col_label_d3_p),
+            row_names_gp = grid::gpar(fontsize = 10),
+            cluster_rows = dend,
+            row_names_side = "left",
+            show_column_names = FALSE,
+            row_title = NULL,
+            row_split = 3,
+            column_split = 3,
+            row_gap = unit(2, "mm"),
+            column_gap = unit(2, "mm"),
+            border = TRUE,
+            cell_fun = cell_fun1,
+            width = unit(8, "cm"), height = unit(8, "cm"),
+            cluster_columns = dend)
+h
+##detect
+
+d = Heatmap(f_diagonal(c_detec),name="Correlation",col = col_fun,
+            column_title = "Dose 3 positive",
+            column_title_side = "bottom",
+            show_row_dend = FALSE,
+            cluster_rows = dend,
+            row_names_side = "left",
+            show_column_names = FALSE,
+            row_title = NULL,
+            row_split = 3,
+            column_split = 3,
+            row_gap = unit(2, "mm"),
+            column_gap = unit(2, "mm"),
+            border = TRUE,
+            cell_fun = cell_fun2,
+            width = unit(8, "cm"), height = unit(8, "cm"),
+            cluster_columns = dend)
+d
+##detect
+n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
+            column_title = "Dose 3 non-positive",
+            column_title_side = "bottom",
+            show_row_dend = FALSE,
+            cluster_rows = dend,
+            row_names_side = "left",
+            show_column_names = FALSE,
+            row_title = NULL,
+            row_split = 3,
+            column_split = 3,
             row_gap = unit(2, "mm"),
             column_gap = unit(2, "mm"),
             border = TRUE,
