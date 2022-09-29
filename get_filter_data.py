@@ -204,8 +204,6 @@ file = open(fold + "/data_aux/immune_clean_a3.pkl","wb")
 pk.dump(comp,file)
 file.close()
 
-#d2_d = d2_d.loc[d2_d["batch"]==2,:]
-#d3_d = d3_d.loc[d3_d["batch"]==2,:]
 
 x_d2_d = d2_d[immune_col].copy()
 y_d2_d = d2_d.gr_d2_d.copy()
@@ -232,7 +230,7 @@ y_d3_p = d3_p.gr_d3_p.copy()
 #imputation
 imp = Imputation_mean()
 #imp = Imputation(immune_col=immune_col)
-x_d2_d = imp.fit_transform(x_d2_d,)
+x_d2_d = imp.fit_transform(x_d2_d)
 x_d3_d = imp.fit_transform(x_d3_d)
 x_d3_p = imp.fit_transform(x_d3_p)
 

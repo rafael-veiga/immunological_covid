@@ -8,7 +8,7 @@ Created on Wed May 11 15:08:12 2022
 import pickle as pk
 import os
 import pandas as pd
-from Tools import SVM,Feature_SVM_RFE,Remove__col_NA,Imputation_mean,Standart
+from Tools import SVM,Feature_SVM_RFE,Remove__col_NA,Imputation_mean,Standart,LR
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import accuracy_score,roc_auc_score,balanced_accuracy_score,precision_score,recall_score
@@ -84,8 +84,11 @@ immune_col = data["immune_col"]
 ## part 1 and 2
 d2_d = data["d2_d"]
 d3_d = data["d3_d"]
+d3_p = data["d3_p"]
 
-
+#d2_d = d2_d.loc[d2_d["batch"]==2,:]
+#d3_d = d3_d.loc[d3_d["batch"]==2,:]
+#d3_p = d3_p.loc[d3_p["batch"]==2,:]
 
 x_d2_d = d2_d[["age","sex","tx_time","type"]+immune_col].copy()
 re = Remove__col_NA(percentage_of_NA=20)
@@ -106,11 +109,21 @@ for c in immune_col:
 y_d3_d = d3_d["d3_d"].copy()
 
 
+x_d3_p = d3_p[["age","sex","tx_time","type"]+immune_col].copy()
+x_d3_p = re.fit_transform(x_d3_p)
+immune_col_d3_p = immune_col.copy()
+for c in immune_col:
+    if not c in x_d3_p.columns:
+        immune_col_d3_p.remove(c)
+y_d3_p = d3_p["d3_p"].copy()
+
+
 ##############################################################
 #imputation
 imp = Imputation_mean()
 x_d2_d = imp.fit_transform(x_d2_d)
 x_d3_d = imp.fit_transform(x_d3_d)
+x_d3_p = imp.fit_transform(x_d3_p)
 
 
 ##############################################################
@@ -118,6 +131,7 @@ x_d3_d = imp.fit_transform(x_d3_d)
 std =   Standart()
 x_d2_d = std.fit_transform(x_d2_d)
 x_d3_d = std.fit_transform(x_d3_d)
+x_d3_p = std.fit_transform(x_d3_p)
 
 ###############################################################
 data = {}
@@ -135,10 +149,12 @@ model.fit(x, y)
 x = x.iloc[:,model.bo.support_]
 print("permitation")
 cluster = getCluster(10, x)
+#10->29; 20->19;30 - > 0
 model = SVM(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
+#model = LR(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
 df = cluster_permutation(model, x, y, cluster)
 data[nome] = {"df":df,"x":x,"y":y}
-# # ##########################################################
+# ##########################################################
 nome = "SVM_RFE_d3_d"
 model = f_SVM
 x = x_d3_d
@@ -148,6 +164,21 @@ model.fit(x, y)
 x = x.iloc[:,model.bo.support_]
 print("permitation")
 cluster = getCluster(95, x)
+model = SVM(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
+#model = LR(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
+df = cluster_permutation(model, x, y, cluster)
+data[nome] = {"df":df,"x":x,"y":y}
+# # ##########################################################
+nome = "SVM_RFE_d3_p"
+model = f_SVM
+x = x_d3_p
+y = y_d3_p
+print(nome)
+model.fit(x, y)
+x = x.iloc[:,model.bo.ranking_<10]
+print("permitation")
+cluster = getCluster(14, x)
+# 25 -> 24; 30 -> 24; 35 -> 2;36 -> 2; 40 -> 15; 34 -> 2; 33-> 2; 32 -> 2; 31 -> 2
 model = SVM(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
 df = cluster_permutation(model, x, y, cluster)
 data[nome] = {"df":df,"x":x,"y":y}
