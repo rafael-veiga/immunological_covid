@@ -141,14 +141,29 @@ gr_d2_d = []
 gr_d3_d = []
 gr_d3_p = []
 
+mmf=[]
+ctc = []
+
 meta = Data()
 meta.load(fold + "/data_aux/banco_meta.dat")
 
-col = ["Sample","age","sex","type","tx_time","D2_detect","D3_detect","D3_pos"]
+col = ["Sample","age","sex","type","tx_time","D2_detect","D3_detect","D3_pos","MMF","CTC"]
 meta = meta.get_dataset(cols=col)
 
 sam = list(data.get_dataset(cols=["Sample"]).Sample)
 for s in sam:
+    if int(meta.loc[meta.Sample==s].MMF)==0:
+        mmf.append(0)
+    elif int(meta.loc[meta.Sample==s].MMF)==1:
+        mmf.append(1)
+    else:
+        mmf.append(np.na)
+    if int(meta.loc[meta.Sample==s].CTC)==0:
+        ctc.append(0)
+    elif int(meta.loc[meta.Sample==s].CTC)==1:
+        ctc.append(1)
+    else:
+        ctc.append(np.na)
     if meta.loc[meta.Sample==s].type.iloc[0] =="i":
         gr_d2_d.append("h")
         gr_d3_d.append("h")
@@ -180,6 +195,8 @@ for s in sam:
 data.add_var(gr_d2_d, "gr_d2_d", "outcome")
 data.add_var(gr_d3_d, "gr_d3_d", "outcome")
 data.add_var(gr_d3_p, "gr_d3_p", "outcome")
+data.add_var(mmf, "MMF", "outcome")
+data.add_var(ctc, "CTC", "outcome")
 
 banco = data.get_dataset()
 d2_d = banco.copy()
@@ -207,25 +224,32 @@ file.close()
 
 x_d2_d = d2_d[immune_col].copy()
 y_d2_d = d2_d.gr_d2_d.copy()
+y2_d2_d = d2_d.MMF.copy()
+y3_d2_d = d2_d.CTC.copy()
 
 x_d3_d = d3_d[immune_col].copy()
 y_d3_d = d3_d.gr_d3_d.copy()
+y2_d3_d = d3_d.MMF.copy()
+y3_d3_d = d3_d.CTC.copy()
 
 x_d3_p = d3_p[immune_col].copy()
 y_d3_p = d3_p.gr_d3_p.copy()
+y2_d3_p = d3_p.MMF.copy()
+y3_d3_p = d3_p.CTC.copy()
 
 #######################
-#remove na
-# re = Remove__col_NA(percentage_of_NA=20)
-# x_d2_d = re.fit_transform(x_d2_d)
-# x_d3_d = re.fit_transform(x_d3_d)
-# x_d3_p = re.fit_transform(x_d3_p)
+# remove na
+#re = Remove__col_NA(percentage_of_NA=30)
+#x_d2_d = re.fit_transform(x_d2_d)
+#x_d3_d = re.fit_transform(x_d3_d)
+#x_d3_p = re.fit_transform(x_d3_p)
 #####################################
+
 # remove outliers
-# re = Remove__Outliers(std=3)
-# x_d2_d = re.fit_transform(x_d2_d)
-# x_d3_d = re.fit_transform(x_d3_d)
-# x_d3_p = re.fit_transform(x_d3_p)
+re = Remove__Outliers(std=3)
+x_d2_d = re.fit_transform(x_d2_d)
+x_d3_d = re.fit_transform(x_d3_d)
+x_d3_p = re.fit_transform(x_d3_p)
 #################################
 #imputation
 imp = Imputation_mean()
@@ -244,7 +268,9 @@ x_d3_p = std.fit_transform(x_d3_p)
 ##############################################################
 
 comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,"x_d3_p":x_d3_p,
-        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,"y_d3_p":y_d3_p
+        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,"y_d3_p":y_d3_p,
+        "y2_d2_d":y2_d2_d,"y2_d3_d":y2_d3_d,"y2_d3_p":y2_d3_p,
+        "y3_d2_d":y3_d2_d,"y3_d3_d":y3_d3_d,"y3_d3_p":y3_d3_p
         }
 
 file = open(fold + "/data_aux/immune_clean_a2.pkl","wb")

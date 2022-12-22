@@ -24,6 +24,7 @@ from joblib import Parallel, delayed
 from sklearn.feature_selection import RFECV
 from sklearn.preprocessing import StandardScaler
 from boruta import BorutaPy
+import torch
 
 class Data:
     __data = None
@@ -590,6 +591,31 @@ class SVM(ClassifierMixin, BaseEstimator):
         self.intercv = intercv
         self.n_jobs = n_jobs
         self.line=line
+
+    def fit(self, x, y):
+        comp = get_hyper_SVM(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv,line=self.line)
+        model = SVC(C=comp["c"],gamma=comp["gamma"],kernel=comp["kernel"],class_weight="balanced",probability=True)
+        model.fit(x, y)
+        self.model = model
+        return self
+
+    def predict(self, x):
+        self.x_test = x
+        return self.model.predict(x)
+    
+    def predict_proba(self,x):
+        return self.model.predict_proba(x)
+    
+    def decision_function(self, x):
+        return self.model.decision_function(x)[:,1]
+    
+class ANN(ClassifierMixin, BaseEstimator):
+    def __init__(self,random_state=0,intercv = 3,n_jobs = 15):
+        self.random_state = random_state
+        self.intercv = intercv
+        self.n_jobs = n_jobs
+
+        
 
     def fit(self, x, y):
         comp = get_hyper_SVM(x,y,seed=self.random_state,n_jobs = self.n_jobs, cv=self.intercv,line=self.line)
