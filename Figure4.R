@@ -84,7 +84,7 @@ comp_ndetect = f_comp(c_nor,c_ndetec)
 
 
 
-col_fun = colorRamp2(c(1,0, -1), c("blue","white", "red"))
+col_fun = colorRamp2(c(1,0, -1), c("red","white", "blue"))
 colormap2 = colorRamp2(c(-2, 0, 2), c("darkgreen", "white", "tomato4"))
 
 dend = as.dendrogram(hclust(dist(abs(c_nor))))
@@ -120,13 +120,15 @@ cell_fun3 <- function(j, i, x, y, width, height, fill) {
 ## heathy
 h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
             column_title = "Heathy",
-            column_title_side = "bottom",
+            column_title_side = "top",
         show_row_dend = FALSE,
         row_labels = gt_render(col_label_d2_d),
         row_names_gp = grid::gpar(fontsize = 10),
         cluster_rows = dend,
         row_names_side = "left",
-        show_column_names = FALSE,
+        column_labels = gt_render(col_label_d2_d),
+        column_names_rot = -50,
+        column_names_gp = grid::gpar(fontsize = 9),
         row_title = NULL,
         row_split = 4,
         column_split = 4,
@@ -141,7 +143,7 @@ h
 
 d = Heatmap(f_diagonal(c_detec),name="Correlation",col = col_fun,
             column_title = "Dose 2 responders",
-            column_title_side = "bottom",
+            column_title_side = "top",
             show_row_dend = FALSE,
             cluster_rows = dend,
             row_names_side = "left",
@@ -159,7 +161,7 @@ d
 ##detect
 n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
             column_title = "Dose 2 non-responders",
-            column_title_side = "bottom",
+            column_title_side = "top",
             show_row_dend = FALSE,
             cluster_rows = dend,
             row_names_side = "left",
@@ -177,7 +179,7 @@ n
 lgd = Legend(col_fun = colormap2, title = "Healthy",at = c(2, 0, -2),labels = c("low", "equal", "high"))
 A =h+d+n 
 draw(A,heatmap_legend_side = "right",column_title = "A",column_title_gp = gpar(fontsize = 16))
-draw(lgd, x = unit(43, "cm"), y = unit(10, "cm"), just = c("right", "top"))
+draw(lgd, x = unit(43, "cm"), y = unit(13, "cm"), just = c("right", "top"))
 #######################################
 #d3_d
 normal = d3_p[d3_p$gr_d3_p=="h",]
@@ -203,7 +205,7 @@ ndetec$gr_d3_p = NULL
 c_ndetec = f_cor(ndetec)
 comp_ndetect = f_comp(c_nor,c_ndetec)
 
-col_fun = colorRamp2(c(1,0, -1), c("blue","white", "red"))
+col_fun = colorRamp2(c(1,0, -1), c("red","white", "blue"))
 colormap2 = colorRamp2(c(-2, 0, 2), c("darkgreen", "white", "tomato4"))
 
 dend = as.dendrogram(hclust(dist(abs(c_nor))))
@@ -239,13 +241,15 @@ cell_fun3 <- function(j, i, x, y, width, height, fill) {
 ## heathy
 h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
             column_title = "Heathy",
-            column_title_side = "bottom",
+            column_title_side = "top",
             show_row_dend = FALSE,
             row_labels = gt_render(col_label_d3_p),
             row_names_gp = grid::gpar(fontsize = 10),
             cluster_rows = dend,
             row_names_side = "left",
-            show_column_names = FALSE,
+            column_labels = gt_render(col_label_d3_p),
+            column_names_rot = -50,
+            column_names_gp = grid::gpar(fontsize = 9),
             row_title = NULL,
             row_split = 3,
             column_split = 3,
@@ -260,7 +264,7 @@ h
 
 d = Heatmap(f_diagonal(c_detec),name="Correlation",col = col_fun,
             column_title = "Dose 3 positive",
-            column_title_side = "bottom",
+            column_title_side = "top",
             show_row_dend = FALSE,
             cluster_rows = dend,
             row_names_side = "left",
@@ -278,7 +282,7 @@ d
 ##detect
 n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
             column_title = "Dose 3 non-positive",
-            column_title_side = "bottom",
+            column_title_side = "top",
             show_row_dend = FALSE,
             cluster_rows = dend,
             row_names_side = "left",
@@ -297,4 +301,4 @@ lgd = Legend(col_fun = colormap2, title = "Healthy",at = c(2, 0, -2),labels = c(
 B =h+d+n
 
 draw(B,heatmap_legend_side = "right",column_title = "B",column_title_gp = gpar(fontsize = 16))
-draw(lgd, x = unit(43, "cm"), y = unit(10, "cm"), just = c("right", "top"))
+draw(lgd, x = unit(43, "cm"), y = unit(12.6, "cm"), just = c("right", "top"))
