@@ -2,8 +2,8 @@
 code used in paper "Systems vaccinology identifies medical and immunological correlates of SARS-CoV-2 protection in organ transplantation recipients"
 
 ## Table of contents
-* [Files description](##Files-description)
-* [Necessary repositories](##Necessary-repositories)
+* [Files description](#Files-description)
+* [Necessary repositories](#Necessary-repositories)
 
 
 ## Files description
