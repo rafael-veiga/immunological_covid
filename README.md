@@ -3,6 +3,8 @@ code used in paper "Systems vaccinology identifies medical and immunological cor
 
 ## Table of contents
 * [Files description](##Files-description)
+* [Necessary repositories](##Necessary-repositories)
+
 
 ## Files description
 * **Tools.py** :  Set containing machine tool learning techniques. The tools were parallelized and suitable for performing nested cross-validation. These implementations can be easily adapted and reused in different pipelines. A complete and current version can be found in the repository [https://github.com/rafael-veiga/tools_ML.git](https://github.com/rafael-veiga/tools_ML.git).
@@ -16,4 +18,8 @@ code used in paper "Systems vaccinology identifies medical and immunological cor
 * **table2a.R** : Performs the analysis and builds table 2.
 * **table2b.R** : Performs the analysis and builds table 2.
 * **table2c.R** : Performs the analysis and builds table 2.
+* **Figure4.R** : Performs the necessary analyzes and creates figure 4.
+
+## Necessary repositories
+
 
