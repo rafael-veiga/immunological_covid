@@ -22,4 +22,7 @@ code used in paper "Systems vaccinology identifies medical and immunological cor
 
 ## Necessary repositories
 
-
+* **plotly** : version 5.13.1
+* **python** : version 3.9.16
+* **pandas** : version  1.5.3
+* **sklearn** : version 1.2.1
