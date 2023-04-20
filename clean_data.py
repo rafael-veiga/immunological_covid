@@ -85,7 +85,7 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       for i in icov["ID"].index:
           icov.loc[i,"Sample"] = "ICOV_"+str("{:03d}".format(icov.ID[i]))
       del icov["ID"]
-      icov.columns = ["age","sex","Sample"]
+      icov.columns = ["age","HTA","Cancer","sex","Sample"]
       icov.sex.replace({"Homme":"m","Femme":"f"},inplace=True)
       df = df.merge(icov,on="Sample",how="outer")
       lung = pd.read_csv(file_lung)
@@ -93,35 +93,26 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       for i in lung["patient"].index:
           lung.loc[i,"Sample"] = "Lung_"+str("{:03d}".format(lung.patient.loc[i]))
       del lung["patient"]
-      b = []
-      for i in lung["Sample"].index:
-          for j in df.Sample.index:        
-              if df.Sample.loc[j].startswith(lung.Sample.loc[i]):
-                  lung.loc[i,"Sample"] = df.Sample.loc[j]
+      
       lung.sex.replace({"h":"m"},inplace=True)
-      lung.rename({"temps_greffe":"tx_time"},axis=1,inplace=True)
+      lung.rename({"temps_greffe":"tx_time","GFR <30":"GFR_30","Time after transplant (years)":"tx_time","Transplant rank":"Transplant_rank","Induction treatment":"Induction_treatment","Number of treatments":"Number_of_treatments","covid BC":"covid_BC","Aza":"AZA"},axis=1,inplace=True)
       lung.replace({"<5":2.5,"SNA":np.nan,"Discard":np.nan},inplace=True)
       lung["D2_v"] = pd.to_numeric(lung["D2_v"])
       lung["D3_v"] = pd.to_numeric(lung["D3_v"])
 
-      a=[]
-      for l in lung.Sample:
-          if not l in list(df.Sample):
-              a.append(l)
-      b = []
-      for l in df.Sample[df.type=="l"]:
-          if not l in list(lung.Sample):
-              b.append(l)
-
       df = df.merge(lung,on="Sample",how="outer")
-      for l in a:
-          df.loc[l==df.Sample,"type"] = "l"
+      
       df.loc[df.type=="l","sex_x"] = df.loc[df.type=="l","sex_y"]
       del df["sex_y"]
       df.loc[df.type=="l","age_x"] = df.loc[df.type=="l","age_y"]
       del df["age_y"]
-      del df["covid BC"]
-      df.rename({"sex_x":"sex","age_x":"age"},axis=1,inplace=True)
+      df.loc[df.type=="l","HTA_x"] = df.loc[df.type=="l","HTA_y"]
+      del df["HTA_y"]
+      df.loc[df.type=="l","Cancer_x"] = df.loc[df.type=="l","Cancer_y"]
+      del df["Cancer_y"]
+      
+      del df["covid_BC"]
+      df.rename({"sex_x":"sex","age_x":"age","HTA_x":"HTA","Cancer_x":"Cancer"},axis=1,inplace=True)
       df.loc[df.type=="i","FK"] = 0
       df.loc[df.type=="i","CTC"] = 0
       df.loc[df.type=="i","AZA"] = 0
@@ -133,41 +124,32 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       df.loc[df.type=="i","D3_response"] = "Positive"
 
 
-      nefro = pd.read_excel(file_kidney)
+      nefro = pd.read_csv(file_kidney)
       nefro["Sample"] = ""
       for i in nefro["ID patient"].index:
           nefro.loc[i,"Sample"] = "Kidney_Tx_n_"+str("{:03d}".format(nefro.loc[i,"ID patient"]))
       del nefro["ID patient"]
       nefro.sex.replace({"h":"m"},inplace=True)
-      del nefro["Tx/HD"]
-      del nefro["naïf / infecté"]
+      #del nefro["Tx/HD"]
+#      del nefro["naïf / infecté"]
       del nefro['Statut']
-      nefro.Ethnie.replace({0:"Europe",
-                            1: "other",
-                            2: "other",
-                            3: "other",
-                            4: "other",
-                            5: "other",
-                            6: "other"},inplace=True)
+      #nefro.Ethnie.replace({0:"Europe",
+      #                      1: "other",
+      #                      2: "other",
+      #                      3: "other",
+      #                      4: "other",
+      #                      5: "other",
+      #                      6: "other"},inplace=True)
 
-      nefro.rename({"diabète":"diabete","IRC<30":"IRC30","autre comorbidités":"other_cormobity","Aza":"AZA","Tx date":"tx_date"},axis=1,inplace=True)
-      nefro['tx_date'] = pd.to_datetime(nefro['tx_date'],format='%d/%m/%Y')
-      nefro['Vacc° date V1'] = pd.to_datetime(nefro['Vacc° date V1'],format='%d/%m/%Y')
-      nefro["tx_time"] = np.nan  
-      for i in nefro['tx_date'].index:
-          a = nefro.loc[i,'Vacc° date V1'] - nefro.loc[i,'tx_date']
-          nefro.loc[i,"tx_time"] = a.days/365.2425
-      del nefro['tx_date']
-      del nefro['Vacc° date V1']
-      del nefro['Vacc° date V2']
-      del nefro['Vacc° date V3']
-      nefro.Orencia.replace("Orencia",1,inplace=True)
+      nefro.rename({"diabète":"Diabetes","Time after transplant (years)":"tx_time","GFR <30":"GFR_30",
+                    "Transplant rank":"Transplant_rank","Induction treatment":"Induction_treatment","Number of treatments":"Number_of_treatments",
+                    "covid BC":"covid_BC","Ethnie":"Ethnicity","Aza":"AZA"},axis=1,inplace=True)
+      
+     
       nefro["Orencia"] = pd.to_numeric(nefro["Orencia"])
       nefro.replace({"Discard":np.nan,"2618*":2618,"75049*":75049,"mAB":np.nan,"sortie":np.nan},inplace=True)
       nefro["D2_v"] = pd.to_numeric(nefro["D2_v"])
       nefro["D3_v"] = pd.to_numeric(nefro["D3_v"])      
-      del nefro['délai Tx-Vacc°']
-
       a=[]
       for l in nefro.Sample:
           if not l in list(df.Sample):
@@ -182,8 +164,31 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       for l in a:
           df.loc[l==df.Sample,"type"] = "k"
 
+      df.loc[df.type=="k","Cancer_x"] = df.loc[df.type=="k","Cancer_y"]
+      del df["Cancer_y"]
+      df.loc[df.type=="k","BMI_x"] = df.loc[df.type=="k","BMI_y"]
+      del df["BMI_y"]
+      df.loc[df.type=="k","HTA_x"] = df.loc[df.type=="k","HTA_y"]
+      del df["HTA_y"]
+      df.loc[df.type=="k","CV_x"] = df.loc[df.type=="k","CV_y"]
+      del df["CV_y"]
+      df.loc[df.type=="k","GFR_30_x"] = df.loc[df.type=="k","GFR_30_y"]
+      del df["GFR_30_y"]
+      df.loc[df.type=="k","Ethnicity_x"] = df.loc[df.type=="k","Ethnicity_y"]
+      del df["Ethnicity_y"]
+      df.loc[df.type=="k","Transplant_rank_x"] = df.loc[df.type=="k","Transplant_rank_y"]
+      del df["Transplant_rank_y"]
+      df.loc[df.type=="k","Induction_treatment_x"] = df.loc[df.type=="k","Induction_treatment_y"]
+      del df["Induction_treatment_y"]
+      df.loc[df.type=="k","Number_of_treatments_x"] = df.loc[df.type=="k","Number_of_treatments_y"]
+      del df["Number_of_treatments_y"]
+      df.loc[df.type=="k","Diabetes_x"] = df.loc[df.type=="k","Diabetes_y"]
+      del df["Diabetes_y"]
+
       df.loc[df.type=="k","sex_x"] = df.loc[df.type=="k","sex_y"]
       del df["sex_y"]
+      
+      
       df.loc[df.type=="k","age_x"] = df.loc[df.type=="k","age_y"]
       del df["age_y"]
       df.loc[df.type=="k","FK_x"] = df.loc[df.type=="k","FK_y"]
@@ -213,10 +218,12 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       df.rename({"sex_x":"sex","age_x":"age","FK_x":"FK","CTC_x":"CTC","MMF_x":"MMF",
                   "Evero_x":"Evero","Orencia_x":"Orencia","CsA_x":"CsA","D2_v_x":"D2_v",
                   "D3_v_x":"D3_v","D2_response_x":"D2_response","D3_response_x":"D3_response",
-                  "AZA_x":"AZA","tx_time_x":"tx_time"},axis=1,inplace=True)
-      del df["Orencia"]
-      del df["cirrhose"]
-      del df["neuro"]
+                  "AZA_x":"AZA","tx_time_x":"tx_time","Cancer_x":"Cancer","BMI_x":"BMI","HTA_x":"HTA","CV_x":"CV","GFR_30_x":"GFR_30",
+                  "Ethnicity_x":"Ethnicity","Diabetes_x":"Diabetes","Transplant_rank_x":"Transplant_rank",
+                  "Induction_treatment_x":"Induction_treatment","Number_of_treatments_x":"Number_of_treatments"},axis=1,inplace=True)
+      #del df["Orencia"]
+      #del df["cirrhose"]
+      del df["autre comorbidités"]
       # positive 
       d2 = df.D2_response.copy()
       d2.replace({"Negative":0,"Positive":1,"Detectable":0},inplace=True)
@@ -350,9 +357,9 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
 fold = os.getcwd()
 
 banco_meta,col_map_meta,banco_imune,col_map_imune = openCleanData(fold + "/data/20220728_final_data_combined.csv",
-                        file_icov= fold+"/data/ICOV.csv",
-                        file_lung= fold + "/data/lung.csv",
-                        file_kidney= fold + "/data/nefro.xlsx",
+                        file_icov= fold+"/data/n_ICOV.csv",
+                        file_lung= fold + "/data/n_lung.csv",
+                        file_kidney= fold + "/data/n_nefro.csv",
                         file_batch=fold + "/data/batch.csv")
 
 banco_imune = Data(banco_imune,col_map_imune)
