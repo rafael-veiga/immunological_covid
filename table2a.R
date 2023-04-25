@@ -1,5 +1,5 @@
 banco = read.csv("./data_aux/table2.csv")
-## table 1
+
 # type
 banco$type = as.factor(banco$type)
 tab = table(banco$type,banco$D2_detect)
@@ -10,15 +10,6 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-# batch
-banco$batch = as.factor(banco$batch)
-tab = table(banco$batch,banco$D2_detect)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
 #Age
 banco$age_c = rep(NA,length(banco$age))
 banco$age_c[banco$age<=50] = 0
@@ -62,6 +53,20 @@ for(i in 1:length(tab[,2])){
 #Overweight = 25-29.9
 #Obesity = BMI of 30
 
+#Ethnie
+banco$Ethnicity[banco$Ethnicity==0] = 0
+banco$Ethnicity[banco$Ethnicity==1] = 2
+banco$Ethnicity[banco$Ethnicity==2] = 2 # only 1 case
+banco$Ethnicity[banco$Ethnicity==3] = 1
+banco$Ethnicity[banco$Ethnicity==4] = 1
+banco$Ethnicity = as.factor(banco$Ethnicity)
+tab = table(banco$Ethnicity,banco$D2_detect)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
+}
 
 #tx_time
 banco$tx_time_c = rep(NA,length(banco$tx_time))
@@ -79,14 +84,13 @@ for(i in 1:length(tab[,2])){
 }
 
 
-#Ethnie
-banco$Ethnie[banco$Ethnie==""] = NA
-banco$Ethnie[banco$Ethnie=="Asiatique"] = NA # only 1 case
-banco$Ethnie[banco$Ethnie=="afro-Subsaharien"] = "afro"
-banco$Ethnie[banco$Ethnie=="Afro NA"] = "afro"
-banco$Ethnie[banco$Ethnie=="Latino"] = NA
-banco$Ethnie = as.factor(banco$Ethnie)
-tab = table(banco$Ethnie,banco$D2_detect)
+#Transplant rank
+banco$Transplant_rank[banco$Transplant_rank==1] = 0
+banco$Transplant_rank[banco$Transplant_rank==2] = 1
+banco$Transplant_rank[banco$Transplant_rank==3] = 1
+banco$Transplant_rank = as.factor(banco$Transplant_rank)
+
+tab = table(banco$Transplant_rank,banco$D2_detect)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -95,8 +99,8 @@ for(i in 1:length(tab[,2])){
 }
 
 #diabetes
-banco$diabete = as.factor(banco$diabete)
-tab = table(banco$diabete,banco$D2_detect)
+banco$Diabetes = as.factor(banco$Diabetes)
+tab = table(banco$Diabetes,banco$D2_detect)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -124,9 +128,9 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#IRC30
-banco$IRC30 = as.factor(banco$IRC30)
-tab = table(banco$IRC30,banco$D2_detect)
+#GFR<30
+banco$GFR_30 = as.factor(banco$GFR_30)
+tab = table(banco$GFR_30,banco$D2_detect)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -134,29 +138,10 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#Iresp
-banco$Iresp = as.factor(banco$Iresp)
-tab = table(banco$Iresp,banco$D2_detect)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
 
 #Cancer
 banco$Cancer = as.factor(banco$Cancer)
 tab = table(banco$Cancer,banco$D2_detect)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
-
-#other_cormobity
-banco$other_cormobity = as.factor(banco$other_cormobity)
-tab = table(banco$other_cormobity,banco$D2_detect)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -224,32 +209,87 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
+#Induction treatment
+banco$Induction_treatment[banco$Induction_treatment==0] = NA
+banco$Induction_treatment[banco$Induction_treatment==1] = 0
+banco$Induction_treatment[banco$Induction_treatment==2] = 1
+banco$Induction_treatment[banco$Induction_treatment==3] = 2
+banco$Induction_treatment = as.factor(banco$Induction_treatment)
 
-# model selection
-# D2_detect
-#var = c("tx_time","type","FK","CTC","AZA","MMF","Evero","CsA")
-var = c("tx_time","type","FK","CTC","AZA","Evero","CsA")
-for(v in var){
-  s = paste0("D2_detect~",v,"+sex+age_c+MMF")
-  model = glm(s,data = banco,family = binomial(link = "logit") )
-  tab = summary(model)
-  print(tab$coefficients[2,4])
+tab = table(banco$Induction_treatment,banco$D2_detect)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#best model = "sex+age_c+MMF""
+#Transplant rank
+banco$Number_of_treatments[banco$Number_of_treatments==2] = 0
+banco$Number_of_treatments[banco$Number_of_treatments==3] = 1
+banco$Number_of_treatments = as.factor(banco$Number_of_treatments)
+
+tab = table(banco$Transplant_rank,banco$D2_detect)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
+}
+
+#######################################################################
+# model selection
+# D2_detect
+#var = c("Number_of_treatments","Induction_treatment","Cancer","GFR_30","CV","HTA","Diabetes","Transplant_rank","Ethnicity","BMI_c","tx_time_c","type","FK","CTC","AZA","MMF","Evero","CsA")
+var = c("Induction_treatment","Cancer","CV","HTA","Diabetes","Transplant_rank","Ethnicity","BMI_c","tx_time_c","type","FK","CTC","AZA","Evero","CsA")
+acepted = c("MMF","GFR_30","Number_of_treatments")
+
+#forward
+ac = ""
+for(v in acepted){
+  ac = paste0(ac,"+",v)
+}
+aic = rep(NA,length(var))
+for(i in 1:length(var)){
+  s = paste0("D2_detect~",var[i],"+sex+age_c", ac)
+  model = glm(s,data = banco,family = binomial(link = "logit") )
+  aic[i] = model$aic
+  print(paste0(var[i]," : ", aic[i]))
+}
+#best
+i = which.min(aic)
+print(paste0(var[i]," : ", aic[i]))
+ante = aic[i]
+
+
+#backward
+
+aic = rep(NA,length(acepted))
+for(i in 1:length(acepted)){
+  ac = ""
+  for(l in 1:length(acepted)){
+    if (i!=l){
+      ac = paste0(ac,"+",acepted[l])
+    }
+  }
+  s = paste0("D2_detect~","sex+age_c", ac)
+  model = glm(s,data = banco,family = binomial(link = "logit") )
+  aic[i] = model$aic
+  print(paste0(acepted[i]," : ", aic[i]))
+}
+#best
+i = which.min(aic)
+print(paste0(acepted[i]," : ", aic[i]))
+print(paste0("before ",ante))
+print(paste0("after ",aic[i]))
+
+#####################################################################
+#best model
+#sex+age_c+MMF+GFR_30+Number_of_treatments
 
 # regression
-# batch
-model = glm(D2_detect~batch+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-# type
-model = glm(D2_detect~type+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+# sex
+model = glm(D2_detect~sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -258,7 +298,7 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 # age_c
-model = glm(D2_detect~age_c+sex+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~age_c+sex+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -272,17 +312,46 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-# sex
-model = glm(D2_detect~sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+#BMI
+model = glm(D2_detect~BMI_c+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+or = exp(coefficients(model))[3]
+ci = exp(confint(model))
+c1 = ci[3,][1]
+c2 = ci[3,][2]
+s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#Ethnicity
+model = glm(D2_detect~Ethnicity+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+or = exp(coefficients(model))[3]
+ci = exp(confint(model))
+c1 = ci[3,][1]
+c2 = ci[3,][2]
+s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+# Transplant type
+model = glm(D2_detect~type+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
+
 
 #tx_time
-model = glm(D2_detect~tx_time_c+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~tx_time_c+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -295,9 +364,67 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
+#Transplant rank
+model = glm(D2_detect~Transplant_rank+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+or = exp(coefficients(model))[3]
+ci = exp(confint(model))
+c1 = ci[3,][1]
+c2 = ci[3,][2]
+s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#Diabetes
+model = glm(D2_detect~Diabetes+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#HTA
+model = glm(D2_detect~HTA+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#CV
+model = glm(D2_detect~CV+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#GFR<30
+model = glm(D2_detect~GFR_30+sex+age_c+MMF+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#Cancer
+model = glm(D2_detect~Cancer+sex+age_c+MMF+GFR_30+Number_of_treatments,data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
 
 #FK
-model = glm(D2_detect~FK+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~FK+sex+age_c+MMF+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -307,7 +434,7 @@ summary(model)
 
 
 #CTC
-model = glm(D2_detect~CTC+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~CTC+sex+age_c+MMF+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -316,7 +443,7 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 #AZA
-model = glm(D2_detect~AZA+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~AZA+sex+age_c+MMF+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -326,7 +453,7 @@ summary(model)
 
 
 #MMF
-model = glm(D2_detect~MMF+sex+age_c,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~MMF+sex+age_c+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -335,7 +462,7 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 #Evero
-model = glm(D2_detect~Evero+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~Evero+sex+age_c+MMF+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -344,7 +471,7 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 #CsA
-model = glm(D2_detect~CsA+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+model = glm(D2_detect~CsA+sex+age_c+MMF+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -352,18 +479,13 @@ c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-
-#best model = "sex+age_c+tx_time_c+MMF"
-
-
-# BMI_c
-model = glm(D2_detect~BMI_c+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+#Induction
+model = glm(D2_detect~Induction_treatment+sex+age_c+MMF+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-
 or = exp(coefficients(model))[3]
 ci = exp(confint(model))
 c1 = ci[3,][1]
@@ -371,77 +493,11 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-#Ethnie
-model = glm(D2_detect~Ethnie+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
+#Number of treatments
+model = glm(D2_detect~Number_of_treatments+sex+age_c+GFR_30,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
-
-#diabete
-model = glm(D2_detect~diabete+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#HTA
-model = glm(D2_detect~HTA+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#CV
-model = glm(D2_detect~CV+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-
-#IRC30
-model = glm(D2_detect~IRC30+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-
-#Iresp
-model = glm(D2_detect~Iresp+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#Cancer
-model = glm(D2_detect~Cancer+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#other_cormobity
-model = glm(D2_detect~other_cormobity+sex+age_c+MMF,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-

@@ -1,19 +1,8 @@
 banco = read.csv("./data_aux/table2.csv")
-## table 1
 
-# type
-banco$type = as.factor(banco$type)
-tab = table(banco$type,banco$D3_pos)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
-
-# batch
-banco$batch = as.factor(banco$batch)
-tab = table(banco$batch,banco$D3_pos)
+# sex
+banco$sex = as.factor(banco$sex)
+tab = table(banco$sex,banco$D3_pos)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -36,15 +25,6 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-# sex
-banco$sex = as.factor(banco$sex)
-tab = table(banco$sex,banco$D3_pos)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
 
 # BMI apenas 1 underweight
 banco$BMI_c = rep(NA,length(banco$BMI))
@@ -60,12 +40,35 @@ s = rep(NA,length(t))
 for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
-
 #Underweight = <18.5
 #Normal = 18.5-24.9
 #Overweight = 25-29.9
 #Obesity = BMI of 30
 
+#Ethnie
+banco$Ethnicity[banco$Ethnicity==0] = 0
+banco$Ethnicity[banco$Ethnicity==1] = 2
+banco$Ethnicity[banco$Ethnicity==2] = 2 # only 1 case
+banco$Ethnicity[banco$Ethnicity==3] = 1
+banco$Ethnicity[banco$Ethnicity==4] = 1
+banco$Ethnicity = as.factor(banco$Ethnicity)
+tab = table(banco$Ethnicity,banco$D3_pos)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
+}
+
+# type
+banco$type = as.factor(banco$type)
+tab = table(banco$type,banco$D3_pos)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
+}
 
 #tx_time
 banco$tx_time_c = rep(NA,length(banco$tx_time))
@@ -83,14 +86,13 @@ for(i in 1:length(tab[,2])){
 }
 
 
-#Ethnie
-banco$Ethnie[banco$Ethnie==""] = NA
-banco$Ethnie[banco$Ethnie=="Asiatique"] = NA # only 1 case
-banco$Ethnie[banco$Ethnie=="afro-Subsaharien"] = "afro"
-banco$Ethnie[banco$Ethnie=="Afro NA"] = "afro"
-banco$Ethnie[banco$Ethnie=="Latino"] = NA
-banco$Ethnie = as.factor(banco$Ethnie)
-tab = table(banco$Ethnie,banco$D3_pos)
+#Transplant rank
+banco$Transplant_rank[banco$Transplant_rank==1] = 0
+banco$Transplant_rank[banco$Transplant_rank==2] = 1
+banco$Transplant_rank[banco$Transplant_rank==3] = 1
+banco$Transplant_rank = as.factor(banco$Transplant_rank)
+
+tab = table(banco$Transplant_rank,banco$D3_pos)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -99,8 +101,8 @@ for(i in 1:length(tab[,2])){
 }
 
 #diabetes
-banco$diabete = as.factor(banco$diabete)
-tab = table(banco$diabete,banco$D3_pos)
+banco$Diabetes = as.factor(banco$Diabetes)
+tab = table(banco$Diabetes,banco$D3_pos)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -128,9 +130,9 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#IRC30
-banco$IRC30 = as.factor(banco$IRC30)
-tab = table(banco$IRC30,banco$D3_pos)
+#GFR<30
+banco$GFR_30 = as.factor(banco$GFR_30)
+tab = table(banco$GFR_30,banco$D3_pos)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -138,29 +140,10 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#Iresp
-banco$Iresp = as.factor(banco$Iresp)
-tab = table(banco$Iresp,banco$D3_pos)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
 
 #Cancer
 banco$Cancer = as.factor(banco$Cancer)
 tab = table(banco$Cancer,banco$D3_pos)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
-
-#other_cormobity
-banco$other_cormobity = as.factor(banco$other_cormobity)
-tab = table(banco$other_cormobity,banco$D3_pos)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -228,32 +211,87 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-
-# model selection
-# Positive for d2 or d3
-#var = c("tx_time","type","FK","CTC","AZA","MMF","Evero","CsA")
-var = c("tx_time","FK","AZA","Evero","CsA")
-for(v in var){
-  s = paste0("D3_pos~",v,"+sex+age_c+MMF+CTC+type")
-  model = glm(s,data = banco,family = binomial(link = "logit") )
-  tab = summary(model)
-  print(tab$coefficients[2,4])
+#Induction treatment
+banco$Induction_treatment[banco$Induction_treatment==0] = NA
+banco$Induction_treatment[banco$Induction_treatment==1] = 0
+banco$Induction_treatment[banco$Induction_treatment==2] = 1
+banco$Induction_treatment[banco$Induction_treatment==3] = 2
+banco$Induction_treatment = as.factor(banco$Induction_treatment)
+tab = table(banco$Induction_treatment,banco$D3_pos)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#best model = "sex+age_c+MMF+CTC+type"
+#Number_of_treatments
+banco$Number_of_treatments[banco$Number_of_treatments==2] = 0
+banco$Number_of_treatments[banco$Number_of_treatments==3] = 1
+banco$Number_of_treatments = as.factor(banco$Number_of_treatments)
 
+tab = table(banco$Transplant_rank,banco$D3_pos)
+t = tab[,1]+tab[,2]
+p = 100*tab[,2]/t
+s = rep(NA,length(t))
+for(i in 1:length(tab[,2])){
+  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
+}
+
+#######################################################################
+# model selection
+# D3_pos
+#var = c("Number_of_treatments","Cancer","GFR_30","CV","HTA","Diabetes","Transplant_rank","Ethnicity","BMI_c","tx_time_c","type","FK","CTC","AZA","MMF","Evero","CsA")
+var = c("Cancer","CV","HTA","Diabetes","Transplant_rank","Ethnicity","BMI_c","FK","CTC","AZA","Evero")
+acepted = c("MMF","GFR_30","type","Number_of_treatments","CsA","tx_time_c")
+
+#forward
+ac = ""
+for(v in acepted){
+  ac = paste0(ac,"+",v)
+}
+aic = rep(NA,length(var))
+for(i in 1:length(var)){
+  s = paste0("D3_pos~",var[i],"+sex+age_c", ac)
+  model = glm(s,data = banco,family = binomial(link = "logit") )
+  aic[i] = model$aic
+  print(paste0(var[i]," : ", aic[i]))
+}
+#best
+i = which.min(aic)
+print(paste0(var[i]," : ", aic[i]))
+ante = aic[i]
+
+
+#backward
+
+aic = rep(NA,length(acepted))
+for(i in 1:length(acepted)){
+  ac = ""
+  for(l in 1:length(acepted)){
+    if (i!=l){
+      ac = paste0(ac,"+",acepted[l])
+    }
+  }
+  s = paste0("D3_pos~","sex+age_c", ac)
+  model = glm(s,data = banco,family = binomial(link = "logit") )
+  aic[i] = model$aic
+  print(paste0(acepted[i]," : ", aic[i]))
+}
+#best
+i = which.min(aic)
+print(paste0(acepted[i]," : ", aic[i]))
+print(paste0("before ",ante))
+print(paste0("after ",aic[i]))
+
+#####################################################################
+#best model
+#sex+age_c+MMF+GFR_30+type+Number_of_treatments+CsA+tx_time_c
+var = "+sex+age_c+MMF+GFR_30+type+Number_of_treatments+CsA+tx_time_c"
 # regression
-# batch
-model = glm(D3_pos~batch+sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-# type
-model = glm(D3_pos~type+sex+age_c+MMF+CTC,data = banco,family = binomial(link = "logit") )
+# sex
+v = "sex"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -262,13 +300,13 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 # age_c
-model = glm(D3_pos~age_c+sex+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+v = "age_c"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-
 or = exp(coefficients(model))[3]
 ci = exp(confint(model))
 c1 = ci[3,][1]
@@ -276,17 +314,50 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-# sex
-model = glm(D3_pos~sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+#BMI
+v="BMI_c"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+or = exp(coefficients(model))[3]
+ci = exp(confint(model))
+c1 = ci[3,][1]
+c2 = ci[3,][2]
+s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#Ethnicity
+v = "Ethnicity"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+or = exp(coefficients(model))[3]
+ci = exp(confint(model))
+c1 = ci[3,][1]
+c2 = ci[3,][2]
+s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+# Transplant type
+v="type"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
+
 
 #tx_time
-model = glm(D3_pos~tx_time_c+sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+v="tx_time_c"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -299,9 +370,76 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
+#Transplant rank
+v="Transplant_rank"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+or = exp(coefficients(model))[3]
+ci = exp(confint(model))
+c1 = ci[3,][1]
+c2 = ci[3,][2]
+s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#Diabetes
+v="Diabetes"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#HTA
+v="HTA"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#CV
+v="CV"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#GFR<30
+v="GFR_30"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+#Cancer
+v="Cancer"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
+or = exp(coefficients(model))[2]
+ci = exp(confint(model))
+c1 = ci[2,][1]
+c2 = ci[2,][2]
+s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
+summary(model)
+
+var = "+sex+age_c+MMF+GFR_30+type+CsA+tx_time_c"
 
 #FK
-model = glm(D3_pos~FK+sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+v="FK"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -311,7 +449,8 @@ summary(model)
 
 
 #CTC
-model = glm(D3_pos~CTC+sex+age_c+MMF+type,data = banco,family = binomial(link = "logit") )
+v="CTC"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -320,7 +459,8 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 #AZA
-model = glm(D3_pos~AZA+sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+v="AZA"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -330,7 +470,8 @@ summary(model)
 
 
 #MMF
-model = glm(D3_pos~MMF+sex+age_c+CTC+type,data = banco,family = binomial(link = "logit") )
+v="MMF"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -339,7 +480,8 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 #Evero
-model = glm(D3_pos~Evero+sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+v="Evero"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -348,7 +490,8 @@ s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf
 summary(model)
 
 #CsA
-model = glm(D3_pos~CsA+sex+age_c+MMF+CTC+type,data = banco,family = binomial(link = "logit") )
+v="CsA"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
@@ -356,15 +499,14 @@ c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-
-# BMI_c
-model = glm(D3_pos~BMI_c+sex+age_c+MMF+CTC,data = banco,family = binomial(link = "logit") )
+#Induction
+v="Induction_treatment"
+model = glm(paste0("D3_pos~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-
 or = exp(coefficients(model))[3]
 ci = exp(confint(model))
 c1 = ci[3,][1]
@@ -372,72 +514,12 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-#Ethnie
-#banco$Ethnie[banco$Ethnie=="Europe"] = 1
-#banco$Ethnie[banco$Ethnie=="afro"] = 0
-model = glm(D3_pos~Ethnie+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
+#D3_pos~Number_of_treatments+sex+age_c+tx_time_c+CV
+#Number of treatments
+model = glm(D3_pos~Number_of_treatments+sex+age_c+tx_time_c+CV,data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
 c1 = ci[2,][1]
 c2 = ci[2,][2]
 s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
-
-#diabete
-model = glm(D3_pos~diabete+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#HTA
-model = glm(D3_pos~HTA+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#CV
-model = glm(D3_pos~CV+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#IRC30
-
-
-
-#Iresp
-model = glm(D3_pos~Iresp+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#Cancer
-model = glm(D3_pos~Cancer+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-
-#other_cormobity
-model = glm(D3_pos~other_cormobity+sex+MMF+CTC,data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
-

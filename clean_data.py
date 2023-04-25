@@ -249,32 +249,25 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       df.loc[(df["D2_detect"]==0) & (df["D3_detect"]==0),"out_detect"] = 0
       df.loc[(df["D2_detect"]==1) & (df["D3_detect"]==0),"out_detect"] = 0
       df.loc[(df["D2_detect"]==0) & (df["D3_detect"]==1),"out_detect"] = 0
-      
-      
+      for i in a:
+          df = df.loc[df["Sample"]!= i]
+      del df["Iresp"]
       
       col = list(df.columns)
+      col.insert(2, "sex")
+      col.pop(6)
       col.insert(4,"BMI")
-      del col[24]
-      col.insert(6,"Ethnie")
-      del col[17]
-      col.insert(7,"diabete")
-      col.insert(8,"HTA")
-      col.insert(9,"CV")
-
-      col.insert(10,"IRC30")
-
-      col.insert(11,"Iresp")
-      col.insert(12,"Cancer")
-      col.insert(13,"other_cormobity")
-      
-      col.insert(24,"out_detect")
-      col.insert(24,"out_pos")
-      col.insert(24,"D2_detect")
-      col.insert(24,"D3_detect")
-      col.insert(24,"D3_pos")
-      col.insert(24,"D2_pos")
-      col = col[0:30]
-      #col.insert(1,"batch")
+      col.pop(7)
+      col.insert(5,col.pop(7))
+      col.insert(6,col.pop(15))
+      col.insert(7,col.pop(12))
+      col.insert(8,col.pop(13))
+      col.insert(9,col.pop(14))
+      col.insert(10,col.pop(11))
+      col.insert(11,col.pop(12))
+      col.insert(12,col.pop(14))
+      col.insert(13,col.pop(26))
+     
       df = df[col]
       #merge banco
       #df = df.merge(bi,on="Sample",how="outer")
@@ -334,10 +327,11 @@ def openCleanData(file_immuno,file_icov,file_lung,file_kidney,file_batch):
       col_map_meta = {}
       col = list(banco.columns)
       tipo = {}
-      u_tipo = ["id","general","comorbity","drugs","outcome"]
-      t = ["id","general","general","general","general","general","general",
-           "comorbity","comorbity","comorbity","comorbity","comorbity","comorbity","comorbity",
-           "drugs","drugs","drugs","drugs","drugs","drugs",
+      u_tipo = ["id","general","treatment","comorbity","drugs","outcome"]
+      t = ["id","general","general","general","general","general",
+           "treatment","treatment","treatment","treatment",
+           "comorbity","comorbity","comorbity",
+           "drugs","drugs","drugs","drugs","drugs","drugs","drugs","drugs","drugs","drugs",
            "outcome","outcome","outcome","outcome","outcome","outcome","outcome","outcome","outcome","outcome"]
       for p in u_tipo:
           aux = []
