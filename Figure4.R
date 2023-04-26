@@ -47,16 +47,14 @@ lin_d2_d = readLines(f,1)
 close(f)
 lin_d2_d = unlist(strsplit(lin_d2_d, ","))
 col_label_d2_d = lin_d2_d[5:14]
-col_label_d2_d = gsub(" :in: ", " in** <br>", col_label_d2_d)
-col_label_d2_d = paste0("**",col_label_d2_d )
+
 
 f = file("data_aux/heat_d3_p.csv","r")
 lin_d3_p = readLines(f,1)
 close(f)
 lin_d3_p = unlist(strsplit(lin_d3_p, ","))
 col_label_d3_p = lin_d3_p[5:14]
-col_label_d3_p = gsub(" :in: ", " in** <br>", col_label_d3_p)
-col_label_d3_p = paste0("**",col_label_d3_p )
+
 #d2_d
 normal = d2_d[d2_d$gr_d2_d=="h",]
 normal$Sample = NULL
@@ -127,7 +125,7 @@ h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
         cluster_rows = dend,
         row_names_side = "left",
         column_labels = gt_render(col_label_d2_d),
-        column_names_rot = -50,
+        column_names_rot = -30,
         column_names_gp = grid::gpar(fontsize = 9),
         row_title = NULL,
         row_split = 4,
@@ -248,7 +246,7 @@ h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
             cluster_rows = dend,
             row_names_side = "left",
             column_labels = gt_render(col_label_d3_p),
-            column_names_rot = -50,
+            column_names_rot = -30,
             column_names_gp = grid::gpar(fontsize = 9),
             row_title = NULL,
             row_split = 3,
