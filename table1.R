@@ -1,5 +1,9 @@
+library(tidyverse)
+library(readxl)
+#banco = read.csv("./data_aux/table1.csv")
 
-banco = read.csv("./data_aux/table1.csv")
+
+novo = read_excel("20230413_clinical_data.xlsx")
 ## table 1
 
 banco$type = as.factor(banco$type)
