@@ -1,4 +1,4 @@
-banco = read.csv("./data/total.csv")
+banco = read.csv("data_aux/table2.csv")
 
 banco$d2_d = NA
 banco$d2_d[banco$D2_response=="Negative"] = 0
@@ -28,7 +28,11 @@ for(i in 1:length(tab[,2])){
 }
 
 # age
-banco$age = as.factor(banco$age)
+age = trunc(banco$age)
+age[age<50] = 0
+age[(age>=50) & (age<60)] = 1
+age[age>=60] = 2
+banco$age = as.factor(age)
 tab = table(banco$age,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
@@ -37,8 +41,11 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-# BMI
-banco$BMI = as.factor(banco$BMI)
+#BMI
+bmi = banco$BMI
+bmi[bmi < 25] = 0
+bmi[bmi>=25] = 1
+banco$BMI = as.factor(bmi)
 tab = table(banco$BMI,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
@@ -48,7 +55,12 @@ for(i in 1:length(tab[,2])){
 }
 
 #Ethnie
-banco$Ethnie = as.factor(banco$Ethnie)
+ethni = banco$Ethnicity
+ethni[ethni==1] = 2
+ethni[ethni==3] = 1
+ethni[ethni==4] = 1
+banco$Ethnie = as.factor(ethni)
+banco$Ethnicity = NULL
 tab = table(banco$Ethnie,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
@@ -70,7 +82,11 @@ for(i in 1:length(tab[,2])){
 
 
 #tx_time
-banco$tx_time = as.factor(banco$tx_time)
+tx_time = banco$tx_time
+tx_time[tx_time<3] = 2
+tx_time[(tx_time>=3) & (tx_time<=10)] = 1
+tx_time[tx_time>10] = 0
+banco$tx_time = as.factor(tx_time)
 tab = table(banco$tx_time,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
@@ -81,8 +97,11 @@ for(i in 1:length(tab[,2])){
 
 
 #tx_rank
-banco$tx_rank = as.factor(banco$tx_rank)
-
+tx_rank = banco$Transplant_rank
+tx_rank[tx_rank==1] = 0
+tx_rank[tx_rank>=2] = 1
+banco$tx_rank = tx_rank
+banco$Transplant_rank = NULL
 tab = table(banco$tx_rank,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
@@ -142,9 +161,16 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#FK
-banco$FK = as.factor(banco$FK)
-tab = table(banco$FK,banco$d2_d)
+#Calcineurin
+cal = banco$FK
+cal[(banco$FK==0) & (banco$CsA==0)] = 0
+cal[(banco$FK==1) & (banco$CsA==0)] = 1
+cal[(banco$FK==0) & (banco$CsA==1)] = 2
+cal = as.factor(cal)
+banco$FK = NULL
+banco$CsA = NULL
+banco$cal = as.factor(cal)
+tab = table(banco$cal,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
 s = rep(NA,length(t))
@@ -192,18 +218,15 @@ for(i in 1:length(tab[,2])){
   s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
 }
 
-#CsA
-banco$CsA = as.factor(banco$CsA)
-tab = table(banco$CsA,banco$d2_d)
-t = tab[,1]+tab[,2]
-p = 100*tab[,2]/t
-s = rep(NA,length(t))
-for(i in 1:length(tab[,2])){
-  s[i] = paste0(tab[i,2],"(",sprintf(p[i], fmt = '%#.1f'),")")
-}
+
 
 #Induction treatment
-banco$Induction_treatment = as.factor(banco$Induction_treatment)
+ind = as.integer(banco$Induction_treatment)
+ind[ind==0] = NA
+ind[ind==1] = 0
+ind[ind==2] = 1
+ind[ind==3] = 2
+banco$Induction_treatment = as.factor(ind)
 tab = table(banco$Induction_treatment,banco$d2_d)
 t = tab[,1]+tab[,2]
 p = 100*tab[,2]/t
@@ -213,7 +236,11 @@ for(i in 1:length(tab[,2])){
 }
 
 #n_treatments
-banco$n_treatments = as.factor(banco$n_treatments)
+num = banco$Number_of_treatments
+num[num<3] = 0
+num[num>=3] = 1
+banco$n_treatments = num
+banco$Number_of_treatments = NULL
 
 tab = table(banco$n_treatments,banco$d2_d)
 t = tab[,1]+tab[,2]
@@ -226,8 +253,8 @@ for(i in 1:length(tab[,2])){
 #######################################################################
 # model selection
 # D2_detect
-#var = c("n_treatments","Induction_treatment","Cancer","GFR_30","CV","HTA","Diabetes","tx_rank","Ethnie","BMI","tx_time","type","FK","CTC","AZA","MMF","Evero","CsA")
-var = c("n_treatments","Cancer","CV","HTA","Diabetes","tx_rank","Ethnie","BMI","tx_time","type","FK","CTC","AZA","Evero","CsA")
+#var = c("n_treatments","Induction_treatment","Cancer","GFR_30","CV","HTA","Diabetes","tx_rank","Ethnie","BMI","tx_time","type","cal","CTC","AZA","MMF","Evero")
+var = c("n_treatments","Cancer","CV","HTA","Diabetes","tx_rank","Ethnie","BMI","tx_time","type","cal","CTC","AZA","Evero")
 acepted = c("MMF","GFR_30","Induction_treatment")
 
 #forward
@@ -459,8 +486,10 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-# FK
-v="FK"
+
+var ="+sex+age+MMF+GFR_30+Induction_treatment"
+# cal
+v="cal"
 model = glm(paste0("d2_d~",v,var),data = banco,family = binomial(link = "logit") )
 or = exp(coefficients(model))[2]
 ci = exp(confint(model))
@@ -539,21 +568,6 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-# CsA
-v="CsA"
-model = glm(paste0("d2_d~",v,var),data = banco,family = binomial(link = "logit") )
-or = exp(coefficients(model))[2]
-ci = exp(confint(model))
-c1 = ci[2,][1]
-c2 = ci[2,][2]
-s = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-
-or = exp(coefficients(model))[3]
-ci = exp(confint(model))
-c1 = ci[3,][1]
-c2 = ci[3,][2]
-s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
-summary(model)
 
 # Induction_treatment
 v="Induction_treatment"
@@ -571,7 +585,7 @@ c2 = ci[3,][2]
 s2 = paste0(sprintf(or, fmt = '%#.2f'),"(",sprintf(c1, fmt = '%#.2f'),"-",sprintf(c2, fmt = '%#.2f'),")")
 summary(model)
 
-var = "+sex+age+GFR_30"
+var ="+sex+age+GFR_30"
 
 # n_treatments
 v="n_treatments"
