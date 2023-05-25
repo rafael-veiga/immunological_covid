@@ -244,6 +244,14 @@ cell_fun3 <- function(j, i, x, y, width, height, fill) {
                 gp = gpar(fill = colormap2(comp_ndetect[i, j]), col = NA))
   } 
 }
+
+##fig D
+
+
+write.csv(comp_detect, "data_aux/comp_detect_d3_p.csv", row.names=FALSE)
+write.csv(comp_ndetect, "data_aux/comp_ndetect_d3_p.csv", row.names=FALSE)
+
+
 ## heathy
 h = Heatmap(f_diagonal(c_nor),name="Correlation",col = col_fun,
             column_title = "Heathy",
