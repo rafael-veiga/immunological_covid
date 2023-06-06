@@ -3,6 +3,7 @@ library(ComplexHeatmap)
 library(circlize)
 library(gridtext)
 library(dendextend)
+library(svglite)
 
 f_cor <- function(df){
   df_cor = cor(df,use="pairwise.complete.obs",method="spearman")
@@ -182,10 +183,14 @@ n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
             width = unit(8, "cm"), height = unit(8, "cm"),
             cluster_columns = dend)
 n
+svg("fig4A.svg", width = 20.7, height = 11)
 lgd = Legend(col_fun = colormap2, title = "Healthy",at = c(2, 0, -2),labels = c("low", "equal", "high"))
 A =h+d+n 
 draw(A,heatmap_legend_side = "right",column_title = "A",column_title_gp = gpar(fontsize = 16))
 draw(lgd, x = unit(43, "cm"), y = unit(13, "cm"), just = c("right", "top"))
+#svg("myplot.svg", width = 4, height = 4)
+dev.off()
+#ggsave("myplot.svg", width = 8, height = 8, units = "cm")
 #######################################
 #d3_d
 normal = d3_p[d3_p$gr_d3_p=="h",]
@@ -311,8 +316,10 @@ n = Heatmap(f_diagonal(c_ndetec),name="Correlation",col = col_fun,
             width = unit(8, "cm"), height = unit(8, "cm"),
             cluster_columns = dend)
 n
+svg("fig4B.svg", width = 20.9, height = 10.5)
 lgd = Legend(col_fun = colormap2, title = "Healthy",at = c(2, 0, -2),labels = c("low", "equal", "high"))
 B =h+d+n
 
 draw(B,heatmap_legend_side = "right",column_title = "B",column_title_gp = gpar(fontsize = 16))
 draw(lgd, x = unit(43, "cm"), y = unit(12.6, "cm"), just = c("right", "top"))
+dev.off()

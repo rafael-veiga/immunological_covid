@@ -239,17 +239,17 @@ y3_d3_p = d3_p.CTC.copy()
 
 #######################
 # remove na
-#re = Remove__col_NA(percentage_of_NA=30)
-#x_d2_d = re.fit_transform(x_d2_d)
-#x_d3_d = re.fit_transform(x_d3_d)
-#x_d3_p = re.fit_transform(x_d3_p)
-#####################################
-
-# remove outliers
-re = Remove__Outliers(std=3)
+re = Remove__col_NA(percentage_of_NA=30)
 x_d2_d = re.fit_transform(x_d2_d)
 x_d3_d = re.fit_transform(x_d3_d)
 x_d3_p = re.fit_transform(x_d3_p)
+#####################################
+
+# remove outliers
+# re = Remove__Outliers(std=3)
+# x_d2_d = re.fit_transform(x_d2_d)
+# x_d3_d = re.fit_transform(x_d3_d)
+# x_d3_p = re.fit_transform(x_d3_p)
 #################################
 #imputation
 imp = Imputation_mean()
