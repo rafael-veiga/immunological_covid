@@ -323,3 +323,7 @@ B =h+d+n
 draw(B,heatmap_legend_side = "right",column_title = "B",column_title_gp = gpar(fontsize = 16))
 draw(lgd, x = unit(43, "cm"), y = unit(12.6, "cm"), just = c("right", "top"))
 dev.off()
+
+
+
+
