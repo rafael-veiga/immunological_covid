@@ -1,3 +1,5 @@
+library(tidyverse)
+
 banco = read.csv("data/total.csv")
 banco$type = as.factor(banco$type)
 # sex
@@ -585,3 +587,70 @@ for(i in 1:l){
 for(i in 1:l){
   print(paste(row.names(tab)[i],ni[i],si[i],nl[i],sl[i],nk[i],sk[i],nt[i],st[i],sep=" "))
 }
+
+#test for association of factors with type of transplant
+banco = read.csv("data/total.csv")
+banco$type = as.factor(banco$type)
+# sex
+banco$sex = as.factor(banco$sex)
+banco$age = as.factor(banco$age)
+banco$BMI = as.factor(banco$BMI)
+banco$Ethnie = as.factor(banco$Ethnie)
+banco$tx_time = as.factor(banco$tx_time)
+banco$tx_rank = as.factor(banco$tx_rank)
+banco$Induction_treatment = as.factor(banco$Induction_treatment)
+banco2 = banco[banco$type!="i",]
+#sex
+mod = chisq.test(banco2$sex[!is.na(banco2$sex)],banco2$type[!is.na(banco2$sex)])
+#age
+mod = chisq.test(banco2$age[!is.na(banco2$age)],banco2$type[!is.na(banco2$age)])
+#BMI
+mod = chisq.test(banco2$BMI[!is.na(banco2$age)],banco2$type)
+#Ethnie
+mod = chisq.test(banco2$Ethnie,banco2$type)
+#tx_time
+mod = chisq.test(banco2$tx_time,banco2$type)
+#tx_rank
+mod = chisq.test(banco2$tx_rank,banco2$type)
+#Diabetes
+mod = chisq.test(banco2$Diabetes,banco2$type)
+#HTA
+mod = chisq.test(banco2$HTA,banco2$type)
+#CV
+mod = chisq.test(banco2$CV,banco2$type)
+#GFR_30
+mod = chisq.test(banco2$GFR_30,banco2$type)
+#Cancer
+mod = chisq.test(banco2$Cancer,banco2$type)
+#CTC
+mod = chisq.test(banco2$CTC,banco2$type)
+#AZA
+mod = chisq.test(banco2$AZA,banco2$type)
+#MMF
+mod = chisq.test(banco2$MMF,banco2$type)
+#Fk
+mod = chisq.test(banco2$FK,banco2$type)
+#CsA
+mod = chisq.test(banco2$CsA,banco2$type)
+#Evero
+mod = chisq.test(banco2$Evero,banco2$type)
+#induction
+mod = chisq.test(banco2$Induction_treatment,banco2$type)
+#n_treatments
+mod = chisq.test(banco2$n_treatments,banco2$type)
+
+# correlaion
+
+banco = read.csv("data/20230413_clinical_data.csv")
+banco = banco[banco$Kidney.Lung.ICOV.healthy.controls!="ICOV",]
+ggplot(banco, aes(x = Time.after.transplant..years., y = Age)) +
+  facet_wrap(~ Kidney.Lung.ICOV.healthy.controls, scales = "free_x") +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm", se = FALSE) +
+  ggpubr::stat_cor(aes(label = tolower(..r.label..)), label.y = 8.1) +
+  theme_classic() +
+  theme(panel.spacing = unit(1, "lines")) +
+  labs(x = "Sepal Width",
+       y = "Sepal Length",
+       title = "Sepal Length vs. Sepal Width in Irises",
+       subtitle = "Grouped by Species")
