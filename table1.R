@@ -643,14 +643,34 @@ mod = chisq.test(banco2$n_treatments,banco2$type)
 
 banco = read.csv("data/20230413_clinical_data.csv")
 banco = banco[banco$Kidney.Lung.ICOV.healthy.controls!="ICOV",]
-ggplot(banco, aes(x = Time.after.transplant..years., y = Age)) +
-  facet_wrap(~ Kidney.Lung.ICOV.healthy.controls, scales = "free_x") +
+banco_all = banco
+banco$Data = banco$Kidney.Lung.ICOV.healthy.controls
+banco_all$Data = "All Samples"
+combined_banco = rbind(banco, banco_all)
+
+ggplot(combined_banco, aes(x = Time.after.transplant..years., y = Age)) +
+  facet_wrap(~ Data, scales = "free_x") +
   geom_point() +
-  geom_smooth(formula = y ~ x, method = "lm", se = FALSE) +
-  ggpubr::stat_cor(aes(label = tolower(..r.label..)), label.y = 8.1) +
+  geom_smooth(formula = y ~ x, method = "lm", se = TRUE) +
+  ggpubr::stat_cor(aes(label = tolower(paste(..rr.label.., ..p.label.., sep = "~"))),method = "pearson", label.y = 8.1,p.accuracy = 0.001,r.accuracy = 0.001) +
   theme_classic() +
   theme(panel.spacing = unit(1, "lines")) +
-  labs(x = "Sepal Width",
-       y = "Sepal Length",
-       title = "Sepal Length vs. Sepal Width in Irises",
-       subtitle = "Grouped by Species")
+  labs(x = "Time after transplant (years)",
+       y = "Age (Years)",
+       title = "Age vs. Time of transplant",
+       subtitle = "Grouped by type of transplant")
+
+
+ggplot(combined_banco, aes(x = factor(Number.of.treatments), y = Age,fill = factor(Number.of.treatments))) +
+  facet_wrap(~ Kidney.Lung.ICOV.healthy.controls, scales = "free_x") +
+  geom_boxplot() +
+  geom_point(position = position_jitter(width = 0.1), size = 2) +
+  ggpubr::stat_compare_means(comparisons = list(c("2", "3")), method = "wilcox.test", label.y = 80,paired = FALSE)+
+  theme_classic() +
+  theme(panel.spacing = unit(1, "lines")) +
+  labs(x = NULL,
+       y = "Age (Years)",
+       title = "Age vs. Number of treatments",
+       subtitle = "Grouped by type of transplant")+
+       scale_x_discrete(labels = NULL)+
+       labs(fill = "Number of treatments")
