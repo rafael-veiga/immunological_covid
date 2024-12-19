@@ -11,7 +11,8 @@ code used in paper "Systems vaccinology identifies medical and immunological cor
 * **Clean_data.py** : All stages of cleaning and building the study database.
 * **feature_selection.py** : Performing all feature selection steps by machine learning for each outcome.
 * **features_eval.py** : Creates the machine learning models, evaluates the models to predict the outcomes, and extracts by measuring the most important features to predict.
-* **figs.ipynb** : Constructions of figures 1, 3 and 5.
+* **figs.ipynb** : Constructions of figures.
+* **figs.R** : Constructions of figures.
 * **process_figs_1_2.py** : Analysis and data extraction to create figures 1 and 2.
 * **get_filter_data.py** : Extract from the database clean the data needed for all analyzes and filter for the specific question.
 * **table1.R** : Performs the analysis and builds table 1.
