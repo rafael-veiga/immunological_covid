@@ -37,10 +37,15 @@ n_jobs = 15
 x_d2_d = comp["SVM_RFE_d2_d"]["x"]
 x_d3_d = comp["SVM_RFE_d3_d"]["x"]
 x_d3_p = comp["SVM_RFE_d3_p"]["x"]
+x_d3_detecble = comp["SVM_RFE_d3_detecble"]["x"]
+x_d3_depos = comp["SVM_RFE_d3_depos"]["x"]
 
 y_d2_d = comp["SVM_RFE_d2_d"]["y"]
 y_d3_d = comp["SVM_RFE_d3_d"]["y"]
 y_d3_p = comp["SVM_RFE_d3_p"]["y"]
+y_d3_detecble = comp["SVM_RFE_d3_detecble"]["y"]
+y_d3_depos = comp["SVM_RFE_d3_depos"]["y"]
+
 
 
 
@@ -58,6 +63,16 @@ y_d3_p_train = []
 x_d3_p_train = []
 y_d3_p_test = []
 x_d3_p_test = [] 
+
+y_d3_detecble_train = []
+x_d3_detecble_train = []
+y_d3_detecble_test = []
+x_d3_detecble_test = []
+
+y_d3_depos_train = []
+x_d3_depos_train = []
+y_d3_depos_test = []
+x_d3_depos_test = []
 
 skf = StratifiedKFold(n_splits=n_outcv,random_state=seed,shuffle=True)
 for train_index, test_index in skf.split(x_d2_d, y_d2_d):
@@ -81,7 +96,21 @@ for train_index, test_index in skf.split(x_d3_p, y_d3_p):
      x_d3_p_test.append(x_d3_p.iloc[test_index,:].copy())
      y_d3_p_test.append(y_d3_p.iloc[test_index].copy())     
 
-     
+skf = StratifiedKFold(n_splits=n_outcv,random_state=seed,shuffle=True)
+for train_index, test_index in skf.split(x_d3_detecble, y_d3_detecble):
+     x_d3_detecble_train.append(x_d3_detecble.iloc[train_index,:].copy())
+     y_d3_detecble_train.append(y_d3_detecble.iloc[train_index].copy())
+     x_d3_detecble_test.append(x_d3_detecble.iloc[test_index,:].copy())
+     y_d3_detecble_test.append(y_d3_detecble.iloc[test_index].copy())
+
+skf = StratifiedKFold(n_splits=n_outcv,random_state=seed,shuffle=True)
+for train_index, test_index in skf.split(x_d3_depos, y_d3_depos):
+     x_d3_depos_train.append(x_d3_depos.iloc[train_index,:].copy())
+     y_d3_depos_train.append(y_d3_depos.iloc[train_index].copy())
+     x_d3_depos_test.append(x_d3_depos.iloc[test_index,:].copy())
+     y_d3_depos_test.append(y_d3_depos.iloc[test_index].copy())
+
+
 def select_feature(x_train,x_test,features):
     x_train_ = x_train.copy()
     x_test_ = x_test.copy()
@@ -246,9 +275,31 @@ features = list(comp["SVM_RFE_d3_p"]["df"]["var"])
 x_train,x_test = select_feature(x_train,x_test, features)
 df_d3_p,comp_d3_p = run_models(x_train=x_train, y_train=y_train,x_test=x_test,y_test=y_test, name=name, n_jobs=n_jobs, n_intcv=n_incv)
 
+#d3_detecble
+print("d3_detecble")
+name = "d3_detecble"
+x_train = x_d3_detecble_train
+y_train = y_d3_detecble_train
+x_test = x_d3_detecble_test
+y_test = y_d3_detecble_test
+features = list(comp["SVM_RFE_d3_detecble"]["df"]["var"])
+x_train,x_test = select_feature(x_train,x_test, features)
+df_d3_detecble,comp_d3_detecble = run_models(x_train=x_train, y_train=y_train,x_test=x_test,y_test=y_test, name=name, n_jobs=n_jobs, n_intcv=n_incv)
 
-data["[SVM_RFE]"] = pd.concat([df_d2_d,df_d3_d,df_d3_p])
-comp = {"SVM_RFE_d2_d":comp_d2_d,"SVM_RFE_d3_d":comp_d3_d,"SVM_RFE_d3_p":comp_d3_p}
+
+#d3_depos
+print("d3_depos")
+name = "d3_depos"
+x_train = x_d3_depos_train
+y_train = y_d3_depos_train
+x_test = x_d3_depos_test
+y_test = y_d3_depos_test
+features = list(comp["SVM_RFE_d3_depos"]["df"]["var"])
+x_train,x_test = select_feature(x_train,x_test, features)
+df_d3_depos,comp_d3_depos = run_models(x_train=x_train, y_train=y_train,x_test=x_test,y_test=y_test, name=name, n_jobs=n_jobs, n_intcv=n_incv)
+
+data["[SVM_RFE]"] = pd.concat([df_d2_d,df_d3_d,df_d3_p,df_d3_detecble,df_d3_depos])
+comp = {"SVM_RFE_d2_d":comp_d2_d,"SVM_RFE_d3_d":comp_d3_d,"SVM_RFE_d3_p":comp_d3_p,"SVM_RFE_d3_detecble":comp_d3_detecble,"SVM_RFE_d3_depos":comp_d3_depos}
 file = open(fold + "/data_aux/feature_eval.pkl","wb")
 pk.dump({"data":data,"comp":comp},file)
 file.close()

@@ -24,7 +24,7 @@ def openCleanData(file_immuno,banco_meta,file_batch):
           if c!= 5:
               del bi[banco.columns[c]]
 
-# #  map     
+    # #  map     
       col = list(bi.columns)
       mark = []
       pop = []
@@ -34,7 +34,7 @@ def openCleanData(file_immuno,banco_meta,file_batch):
           pop.append(False)
           tipo.append("meta")
       fal = []
-#       # markers
+    #       # markers
       for i in range(5,len(col)):
           s = col[i].strip().split(" ")
           if s[1]=="median":
@@ -70,7 +70,7 @@ def openCleanData(file_immuno,banco_meta,file_batch):
       u_popu = list(u_popu[1:len(u_popu)]) 
 
 
-# #add here
+    # #add here
       #meta
       
 
@@ -225,7 +225,7 @@ def openCleanMetaData(file_icov,file_lung,file_kidney):
       del nefro["ID patient"]
       nefro.sex.replace({"h":"m"},inplace=True)
       #del nefro["Tx/HD"]
-#      del nefro["naïf / infecté"]
+    #      del nefro["naïf / infecté"]
       del nefro['Statut']
       #nefro.Ethnie.replace({0:"Europe",
       #                      1: "other",
@@ -367,6 +367,7 @@ def openCleanMetaData(file_icov,file_lung,file_kidney):
       return df
 
  #open and clean data
+
 fold = os.getcwd()
 banco_meta2 = openCleanMetaData(file_icov= fold+"/data/n_ICOV.csv",file_lung= fold + "/data/n_lung.csv",file_kidney= fold + "/data/n_nefro.csv")
 banco_meta,col_map_meta,banco_imune,col_map_imune = openCleanData(file_immuno = fold + "/data/20220728_final_data_combined.csv",banco_meta=banco_meta2,file_batch=fold + "/data/batch.csv")

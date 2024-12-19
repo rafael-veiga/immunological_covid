@@ -78,13 +78,15 @@ del file
 
 n_outcv = 5
 n_incv = 5
-n_jobs = 4
+n_jobs = 15
 
 immune_col = data["immune_col"]
 ## part 1 and 2
 d2_d = data["d2_d"]
 d3_d = data["d3_d"]
 d3_p = data["d3_p"]
+d3_detecble = data["d3_detecble"]
+d3_depos = data["d3_depos"]
 
 #d2_d = d2_d.loc[d2_d["batch"]==2,:]
 #d3_d = d3_d.loc[d3_d["batch"]==2,:]
@@ -117,8 +119,21 @@ for c in immune_col:
         immune_col_d3_p.remove(c)
 y_d3_p = d3_p["d3_p"].copy()
 
+x_d3_detecble = d3_detecble[["age","sex","tx_time","type"]+immune_col].copy()
+x_d3_detecble = re.fit_transform(x_d3_detecble)
+immune_col_d3_detecble = immune_col.copy()
+for c in immune_col:
+    if not c in x_d3_detecble.columns:
+        immune_col_d3_detecble.remove(c)
+y_d3_detecble = d3_detecble["d3_detecble"].copy()
 
-
+x_d3_depos = d3_depos[["age","sex","tx_time","type"]+immune_col].copy()
+x_d3_depos = re.fit_transform(x_d3_depos)
+immune_col_d3_depos = immune_col.copy()
+for c in immune_col:
+    if not c in x_d3_depos.columns:
+        immune_col_d3_depos.remove(c)
+y_d3_depos = d3_depos["d3_depos"].copy()
 
 #######################
 # remove na
@@ -126,6 +141,8 @@ re = Remove__col_NA(percentage_of_NA=30)
 x_d2_d = re.fit_transform(x_d2_d)
 x_d3_d = re.fit_transform(x_d3_d)
 x_d3_p = re.fit_transform(x_d3_p)
+x_d3_detecble = re.fit_transform(x_d3_detecble)
+x_d3_depos = re.fit_transform(x_d3_depos)
 
 ##############################################################
 #imputation
@@ -133,7 +150,8 @@ imp = Imputation_mean()
 x_d2_d = imp.fit_transform(x_d2_d)
 x_d3_d = imp.fit_transform(x_d3_d)
 x_d3_p = imp.fit_transform(x_d3_p)
-
+x_d3_detecble = imp.fit_transform(x_d3_detecble)
+x_d3_depos = imp.fit_transform(x_d3_depos)
 
 ##############################################################
 #stantartization
@@ -141,6 +159,8 @@ std =   Standart()
 x_d2_d = std.fit_transform(x_d2_d)
 x_d3_d = std.fit_transform(x_d3_d)
 x_d3_p = std.fit_transform(x_d3_p)
+x_d3_detecble = std.fit_transform(x_d3_detecble)
+x_d3_depos = std.fit_transform(x_d3_depos)
 
 ###############################################################
 data = {}
@@ -191,6 +211,36 @@ cluster = getCluster(14, x)
 model = SVM(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
 df = cluster_permutation(model, x, y, cluster)
 data[nome] = {"df":df,"x":x,"y":y}
+# # ##########################################################
+nome = "SVM_RFE_d3_detecble"
+model = f_SVM
+x = x_d3_detecble
+y = y_d3_detecble
+print(nome)
+model.fit(x, y)
+x = x.iloc[:,model.bo.ranking_<10]
+print("permitation")
+cluster = getCluster(55, x)
+# 25 -> 24; 30 -> 24; 35 -> 2;36 -> 2; 40 -> 15; 34 -> 2; 33-> 2; 32 -> 2; 31 -> 2
+model = SVM(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
+df = cluster_permutation(model, x, y, cluster)
+data[nome] = {"df":df,"x":x,"y":y}
+
+# # ##########################################################
+nome = "SVM_RFE_d3_depos"
+model = f_SVM
+x = x_d3_depos
+y = y_d3_depos
+print(nome)
+model.fit(x, y)
+x = x.iloc[:,model.bo.ranking_<10]
+print("permitation")
+cluster = getCluster(55, x)
+# 25 -> 24; 30 -> 24; 35 -> 2;36 -> 2; 40 -> 15; 34 -> 2; 33-> 2; 32 -> 2; 31 -> 2
+model = SVM(random_state=seed,intercv = n_incv,n_jobs = n_jobs)
+df = cluster_permutation(model, x, y, cluster)
+data[nome] = {"df":df,"x":x,"y":y}
+
 # # # ##########################################################
 file = open(fold + "/data_aux/feature.dat","wb")
 pk.dump(data,file)

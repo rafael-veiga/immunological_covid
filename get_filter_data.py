@@ -52,7 +52,8 @@ tx = []
 d2_d = []
 d3_d = []
 d3_p = []
-
+d3_detecble = []
+d3_depos = []
 meta = Data()
 meta.load(fold + "/data_aux/banco_meta.dat")
 
@@ -67,6 +68,22 @@ for s in sam:
     d2_d.append(list(meta.loc[meta.Sample==s].D2_detect)[0])
     d3_d.append(list(meta.loc[meta.Sample==s].D3_detect)[0])
     d3_p.append(list(meta.loc[meta.Sample==s].D3_pos)[0])
+
+for i in range(len(sam)):
+    if d3_d[i]==0.0:
+        d3_detecble.append(0.0)
+        d3_depos.append(np.nan)
+    else:
+        if d3_d[i]==1.0:
+            if d3_p[i]==1.0:
+                d3_detecble.append(np.nan)
+                d3_depos.append(1)
+            else:
+                d3_detecble.append(1.0)
+                d3_depos.append(0)
+        else:
+            d3_detecble.append(np.nan)
+            d3_depos.append(np.nan)
 
 for i in range(len(sex)):
     if sex[i]=="f":
@@ -85,6 +102,8 @@ data.add_var(tx, "tx_time", "meta")
 data.add_var(d2_d, "d2_d", "outcome")
 data.add_var(d3_d, "d3_d", "outcome")
 data.add_var(d3_p, "d3_p", "outcome")
+data.add_var(d3_detecble, "d3_detecble", "outcome")
+data.add_var(d3_depos, "d3_depos", "outcome")
 
 
 data.save(fold + "/data_aux/immune_clean_1.dat")
@@ -92,24 +111,43 @@ data.save(fold + "/data_aux/immune_clean_1.dat")
 banco = data.get_dataset()
 d2_d = banco.copy()
 d3_d = banco.copy()
+d3_detecble = banco.copy()
+d3_depos = banco.copy()
 d3_p = banco.copy()
 d2_d = d2_d[~d2_d.d2_d.isna()]
 d3_d = d3_d[~d3_d.d3_d.isna()]
 d3_p = d3_p[~d3_p.d3_p.isna()]
+d3_detecble = d3_detecble[~d3_detecble.d3_detecble.isna()]
+d3_depos = d3_depos[~d3_depos.d3_depos.isna()]
 #d2_d["d2_d"] = d2_d["d2_d"].astype('category')
 del d2_d["d3_d"]
 del d2_d["d3_p"]
+del d2_d["d3_detecble"]
+del d2_d["d3_depos"]
 #d3_d["d3_d"] = d3_d["d3_d"].astype('category')
 del d3_d["d2_d"]
 del d3_d["d3_p"]
+del d3_d["d3_detecble"]
+del d3_d["d3_depos"]
 #d3_p["d3_p"] = d3_p["d3_p"].astype('category')
 del d3_p["d3_d"]
 del d3_p["d2_d"]
+del d3_p["d3_detecble"]
+del d3_p["d3_depos"]
+#d3_detecble["d3_detecble"] = d3_detecble["d3_detecble"].astype('category')
+del d3_detecble["d2_d"]
+del d3_detecble["d3_d"]
+del d3_detecble["d3_p"]
+del d3_detecble["d3_depos"]
+#d3_depos["d3_depos"] = d3_depos["d3_depos"].astype('category')
+del d3_depos["d2_d"]
+del d3_depos["d3_d"]
+del d3_depos["d3_p"]
+del d3_depos["d3_detecble"]
 
 
 
-
-comp = {"d2_d":d2_d,"d3_d":d3_d,"d3_p":d3_p,"immune_col":immune_col}
+comp = {"d2_d":d2_d,"d3_d":d3_d,"d3_p":d3_p,"d3_detecble":d3_detecble,"d3_depos":d3_depos,"immune_col":immune_col}
 file = open(fold + "/data_aux/immune_clean_a1.pkl","wb")
 pk.dump(comp,file)
 file.close()
@@ -140,7 +178,8 @@ immune_col = median + proportion
 gr_d2_d = []
 gr_d3_d = []
 gr_d3_p = []
-
+gr_d3_detecble = []
+gr_d3_depos = []
 mmf=[]
 ctc = []
 
@@ -190,11 +229,27 @@ for s in sam:
         else:
             gr_d3_p.append(np.nan)
             
+for i in range(len(gr_d3_d)):
+    if (gr_d3_d[i]=="d") & (gr_d3_p[i]=="d"):
+        gr_d3_detecble.append(np.nan)
+    else:
+        gr_d3_detecble.append(gr_d3_d[i])
 
+for i in range(len(gr_d3_d)):
+    if (gr_d3_p[i]=="d"):
+        gr_d3_depos.append("p")
+    elif (gr_d3_d[i]=="d"):
+        gr_d3_depos.append("d")
+    elif (gr_d3_p[i]=="h"):
+        gr_d3_depos.append("h")
+    else:
+        gr_d3_depos.append(np.nan)
 
 data.add_var(gr_d2_d, "gr_d2_d", "outcome")
 data.add_var(gr_d3_d, "gr_d3_d", "outcome")
 data.add_var(gr_d3_p, "gr_d3_p", "outcome")
+data.add_var(gr_d3_detecble, "gr_d3_detecble", "outcome")
+data.add_var(gr_d3_depos, "gr_d3_depos", "outcome")
 data.add_var(mmf, "MMF", "outcome")
 data.add_var(ctc, "CTC", "outcome")
 
@@ -202,21 +257,44 @@ banco = data.get_dataset()
 d2_d = banco.copy()
 d3_d = banco.copy()
 d3_p = banco.copy()
+d3_detecble = banco.copy()
+d3_depos = banco.copy()
 d2_d = d2_d[~d2_d.gr_d2_d.isna()]
 d3_d = d3_d[~d3_d.gr_d3_d.isna()]
 d3_p = d3_p[~d3_p.gr_d3_p.isna()]
+d3_detecble = d3_detecble[~d3_detecble.gr_d3_detecble.isna()]
+d3_depos = d3_depos[~d3_depos.gr_d3_depos.isna()]
 
 #d2_d["d2_d"] = d2_d["d2_d"].astype('category')
 del d2_d["gr_d3_d"]
 del d2_d["gr_d3_p"]
+del d2_d["gr_d3_detecble"]
+del d2_d["gr_d3_depos"]
+
 
 del d3_d["gr_d2_d"]
 del d3_d["gr_d3_p"]
+del d3_d["gr_d3_detecble"]
+del d3_d["gr_d3_depos"]
+
 
 del d3_p["gr_d2_d"]
 del d3_p["gr_d3_d"]
+del d3_p["gr_d3_detecble"]
+del d3_p["gr_d3_depos"]
 
-comp = {"d2_d":d2_d,"d3_d":d3_d,"d3_p":d3_p}
+
+del d3_detecble["gr_d2_d"]
+del d3_detecble["gr_d3_d"]
+del d3_detecble["gr_d3_p"]
+del d3_detecble["gr_d3_depos"]
+
+del d3_depos["gr_d2_d"]
+del d3_depos["gr_d3_d"]
+del d3_depos["gr_d3_p"]
+del d3_depos["gr_d3_detecble"]
+
+comp = {"d2_d":d2_d,"d3_d":d3_d,"d3_p":d3_p,"d3_detecble":d3_detecble,"d3_depos":d3_depos}
 file = open(fold + "/data_aux/immune_clean_a3.pkl","wb")
 pk.dump(comp,file)
 file.close()
@@ -237,12 +315,24 @@ y_d3_p = d3_p.gr_d3_p.copy()
 y2_d3_p = d3_p.MMF.copy()
 y3_d3_p = d3_p.CTC.copy()
 
+x_d3_detecble = d3_detecble[immune_col].copy()
+y_d3_detecble = d3_detecble.gr_d3_detecble.copy()
+y2_d3_detecble = d3_detecble.MMF.copy()
+y3_d3_detecble = d3_detecble.CTC.copy()
+
+x_d3_depos = d3_depos[immune_col].copy()
+y_d3_depos = d3_depos.gr_d3_depos.copy()
+y2_d3_depos = d3_depos.MMF.copy()
+y3_d3_depos = d3_depos.CTC.copy()
+
+
 #######################
 # remove na
-re = Remove__col_NA(percentage_of_NA=30)
-x_d2_d = re.fit_transform(x_d2_d)
-x_d3_d = re.fit_transform(x_d3_d)
-x_d3_p = re.fit_transform(x_d3_p)
+#re = Remove__col_NA(percentage_of_NA=30)
+#x_d2_d = re.fit_transform(x_d2_d)
+#x_d3_d = re.fit_transform(x_d3_d)
+#x_d3_p = re.fit_transform(x_d3_p)
+#x_d3_detecble = re.fit_transform(x_d3_detecble)
 #####################################
 
 # remove outliers
@@ -257,7 +347,8 @@ imp = Imputation_mean()
 x_d2_d = imp.fit_transform(x_d2_d)
 x_d3_d = imp.fit_transform(x_d3_d)
 x_d3_p = imp.fit_transform(x_d3_p)
-
+x_d3_detecble = imp.fit_transform(x_d3_detecble)
+x_d3_depos = imp.fit_transform(x_d3_depos)
 
 ##############################################################
 #stantartization
@@ -265,12 +356,14 @@ std =   Standart()
 x_d2_d = std.fit_transform(x_d2_d)
 x_d3_d = std.fit_transform(x_d3_d)
 x_d3_p = std.fit_transform(x_d3_p)
+x_d3_detecble = std.fit_transform(x_d3_detecble)
+x_d3_depos = std.fit_transform(x_d3_depos)
 ##############################################################
 
-comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,"x_d3_p":x_d3_p,
-        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,"y_d3_p":y_d3_p,
-        "y2_d2_d":y2_d2_d,"y2_d3_d":y2_d3_d,"y2_d3_p":y2_d3_p,
-        "y3_d2_d":y3_d2_d,"y3_d3_d":y3_d3_d,"y3_d3_p":y3_d3_p
+comp = {"x_d2_d":x_d2_d,"x_d3_d":x_d3_d,"x_d3_p":x_d3_p,"x_d3_detecble":x_d3_detecble,"x_d3_depos":x_d3_depos,
+        "y_d2_d":y_d2_d,"y_d3_d":y_d3_d,"y_d3_p":y_d3_p,"y_d3_detecble":y_d3_detecble,"y_d3_depos":y_d3_depos,
+        "y2_d2_d":y2_d2_d,"y2_d3_d":y2_d3_d,"y2_d3_p":y2_d3_p,"y2_d3_detecble":y2_d3_detecble,"y2_d3_depos":y2_d3_depos,
+        "y3_d2_d":y3_d2_d,"y3_d3_d":y3_d3_d,"y3_d3_p":y3_d3_p,"y3_d3_detecble":y3_d3_detecble, "y3_d3_depos":y3_d3_depos
         }
 
 file = open(fold + "/data_aux/immune_clean_a2.pkl","wb")
