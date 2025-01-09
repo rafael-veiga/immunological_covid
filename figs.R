@@ -7,6 +7,7 @@ library(circlize)
 library(gridtext)
 library(dendextend)
 library(svglite)
+library(ggpubr)
 
 color_d2_d = "#B0BF1A"
 color_d3_d = "#2ca02c"
@@ -98,7 +99,7 @@ plot1 <- ggplot(dados, aes(x = group, y = `CD80+ median  :in:  CD80+ CD11c- CD21
   geom_jitter(width = 0.15, size = 1, shape = 21, fill = "black", color = "black") + 
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + 
   labs(
-    title = "CD80+ CD11c- CD21+ Double Negative B Cells",
+    title = "CD80+ DN1 B cells",
     x = "",
     y = "MFI CD80"
   ) +
@@ -143,7 +144,7 @@ plot3 <- ggplot(dados, aes(x = group, y = `CD57+ median  :in:  CD57+ Double Nega
   geom_jitter(width = 0.2, size = 1, shape = 21, fill = "black", color = "black", alpha = 0.6) + # Ajusta os pontos
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + # Adiciona linhas de média
   labs(
-    title = "CD57+ Double Negative T Cells",
+    title = "CD57+ DN T Cells",
     x = "",
     y = "MFI CD57"
   ) +
@@ -209,7 +210,7 @@ plot6 <- ggplot(dados, aes(x = group, y = `BAFF-R+ median  :in:  BAFF-R+ CD11c- 
   geom_jitter(width = 0.2, size = 1, shape = 21, fill = "black", color = "black", alpha = 0.6) + # Ajusta os pontos
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + # Adiciona linhas de média
   labs(
-    title = "BAFF-R+ CD11c- CD21+ Double Negative B Cells",
+    title = "BAFF-R+ DN1 B cells",
     x = "",
     y = "MFI BAFF-R"
   ) +
@@ -253,7 +254,7 @@ plot8 <- ggplot(dados, aes(x = group, y = `CD80+ CD11c+ CD21- Double Negative B 
   geom_jitter(width = 0.2, size = 1, shape = 21, fill = "black", color = "black", alpha = 0.6) + # Ajusta os pontos
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + # Adiciona linhas de média
   labs(
-    title = "CD11c+ CD21- Double Negative B Cells",
+    title = "DN2 B cells",
     x = "",
     y = "% CD80+"
   ) +
@@ -334,7 +335,7 @@ plot1 <- ggplot(dados, aes(x = group, y = `HLA-DR+ median  :in:  HLA-DR+ Double 
   geom_jitter(width = 0.15, size = 1, shape = 21, fill = "black", color = "black") + 
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + 
   labs(
-    title = "HLA-DR+ Double Negative T Cells",
+    title = "HLA-DR+ DN T Cells",
     x = "",
     y = "MFI HLA-DR"
   ) +
@@ -378,7 +379,7 @@ plot3 <- ggplot(dados, aes(x = group, y = `CD11c+ median  :in:  CD11c+ Double Ne
   geom_jitter(width = 0.15, size = 1, shape = 21, fill = "black", color = "black") + 
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + 
   labs(
-    title = "CD11c+ Double Negative T Cells",
+    title = "CD11c+ DN T Cells",
     x = "",
     y = "MFI CD11"
   ) +
@@ -422,7 +423,7 @@ plot5 <- ggplot(dados, aes(x = group, y = `CD27+ Double Negative T Cells :in: Do
   geom_jitter(width = 0.15, size = 1, shape = 21, fill = "black", color = "black") + 
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + 
   labs(
-    title = "Double Negative T Cells",
+    title = "DN T Cells",
     x = "",
     y = "% CD27+"
   ) +
@@ -510,7 +511,7 @@ plot9 <- ggplot(dados, aes(x = group, y = `CD40+ median  :in:  CD40+ CD21- CD11c
   geom_jitter(width = 0.15, size = 1, shape = 21, fill = "black", color = "black") + 
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + 
   labs(
-    title = "CD40+ CD21- CD11c+ B Cells",
+    title = "CD40+ CD11c+ CD21- B cells",
     x = "",
     y = "MFI CD40"
   ) +
@@ -532,7 +533,7 @@ plot10 <- ggplot(dados, aes(x = group, y = `CD40+ median  :in:  CD40+ CD11c+ CD2
   geom_jitter(width = 0.15, size = 1, shape = 21, fill = "black", color = "black") + 
   stat_summary(fun = median, geom = "crossbar", width = 0.5, color = "darkgray", size = 0.3) + 
   labs(
-    title = "CD40+ CD11c+ CD21- Double Negative B Cells",
+    title = "CD40+ DN2 B cells",
     x = "",
     y = "MFI CD40"
   ) +
@@ -893,7 +894,7 @@ plot5 <- ggplot(dados, aes(x = group, y = `HLA-DR+ median  :in:  HLA-DR+ CD4+ T 
   labs(
     title = "HLA-DR+ CD4+ T Cells",
     x = "",
-    y = "MFI CD27+"
+    y = "MFI HLA-DR"
   ) +
   scale_fill_manual(
     values =  fill_d3_depos
@@ -1455,4 +1456,394 @@ B =h+d+n
 
 draw(B,heatmap_legend_side = "right",column_title = "",column_title_gp = gpar(fontsize = 16))
 draw(lgd, x = unit(43, "cm"), y = unit(12.6, "cm"), just = c("right", "top"))
+dev.off()
+
+################################################################################
+# Suplementary fig 2
+data = read_csv("./data_aux/sup2.csv")
+
+# Mapeie: X = grupo, Y = variável contínua, fill = grupo (para as cores),
+# e use 'group = interaction(grupo, MMF)' e 'position_dodge' 
+# para obter dois violinos (No/Yes) por grupo.
+data$d3_group <- factor(data$d3_group, levels = c("Control", "Non-Positive", "Positive"))
+data$MMF      <- factor(data$MMF,      levels = c("No", "Yes"))
+
+library(tidyverse)
+library(ggsignif)  # para geom_signif()
+
+make_violin_plot <- function(df, var, ylab, titulo, esp) {
+  df_sub <- df %>%
+    select(d3_group, MMF, all_of(var)) %>%
+    mutate(value = .data[[var]])
+  
+  df_max <- df_sub %>%
+    group_by(d3_group) %>%
+    summarise(maxY = max(value, na.rm = TRUE), .groups = "drop")
+  
+  compare_df <- df_sub %>%
+    filter(d3_group != "Control") %>%
+    group_by(d3_group) %>%
+    filter(n_distinct(MMF) == 2) %>%
+    summarise(p.value = wilcox.test(value ~ MMF)$p.value, .groups = "drop") %>%
+    mutate(
+      p.signif = case_when(
+        p.value < 0.0001 ~ "****",
+        p.value < 0.001  ~ "***",
+        p.value < 0.01   ~ "**",
+        p.value < 0.05   ~ "*",
+        TRUE             ~ "ns"
+      )
+    ) %>%
+    left_join(df_max, by = "d3_group") %>%
+    mutate(
+      x_group    = as.numeric(d3_group),
+      xmin       = x_group - 0.2,
+      xmax       = x_group + 0.2,
+      y_position = maxY * 1.10
+    ) %>%
+    filter(p.value < 0.05)
+  
+  p <- ggplot(df_sub, aes(x = d3_group, y = value, fill = d3_group)) +
+    geom_violin(
+      aes(group = interaction(d3_group, MMF)),
+      position = position_dodge(width = 0.8),
+      width    = esp,
+      trim     = FALSE,
+      color    = "black",
+      adjust   = 2.5
+    ) +
+    geom_jitter(
+      aes(shape = MMF),
+      position = position_jitterdodge(
+        dodge.width   = 0.8,
+        jitter.width  = 0.6,
+        jitter.height = 0
+      ),
+      size  = 1,
+      color = "black"
+    ) +
+    stat_summary(
+      aes(group = interaction(d3_group, MMF)),
+      fun      = median,
+      geom     = "crossbar",
+      color    = "black",
+      width    = 0.3,
+      position = position_dodge(width = 0.8)
+    ) +
+    geom_signif(
+      data        = compare_df,
+      aes(
+        xmin       = xmin,
+        xmax       = xmax,
+        annotations= p.signif,
+        y_position = y_position
+      ),
+      manual      = TRUE,
+      inherit.aes = FALSE,
+      tip_length  = 0.01,
+      textsize    = 4,
+      size        = 0.5
+    ) +
+    scale_fill_manual(values = c(
+      "Control"      = "#7f7f7f",
+      "Non-Positive" = "#ff7f0e",
+      "Positive"     = "#1f77b4"
+    )) +
+    scale_shape_manual(values = c("No" = 16, "Yes" = 4)) +
+    theme_classic(base_size = 12) +
+    theme(
+      panel.border    = element_rect(color = "black", fill = NA),
+      legend.position = "right",
+      axis.text.x     = element_text(size = 8),
+      axis.text.y     = element_text(size = 8),
+      axis.title.x    = element_text(size = 10),
+      axis.title.y    = element_text(size = 10),
+      plot.title      = element_text(size = 10)
+    ) +
+    guides(fill = "none") +
+    labs(
+      title = titulo,
+      x     = NULL,
+      y     = ylab,
+      shape = "MMF"
+    )
+  
+  if (nrow(compare_df) > 0) {
+    p <- p + expand_limits(y = max(compare_df$y_position) * 1.05)
+  }
+  
+  return(p)
+}
+
+data <- data %>% filter(!is.na(d3_group))
+df <- data %>% filter(!is.na(`HLA-DR+ median  :in:  HLA-DR+ Double Negative T Cells`))
+
+p1 <- make_violin_plot(df, 
+                       var   = "HLA-DR+ median  :in:  HLA-DR+ Double Negative T Cells", 
+                       ylab  = "MFI HLA-DR", 
+                       titulo= "HLA-DR+ DN T Cells",1)
+
+df <- data %>% filter(!is.na(`HLA-DR+ median  :in:  HLA-DR+ CD4+ T Cells`))
+p2 <- make_violin_plot(df, 
+                       var   = "HLA-DR+ median  :in:  HLA-DR+ CD4+ T Cells", 
+                       ylab  = "MFI HLA-DR", 
+                       titulo= "HLA-DR+ CD4+ T Cells",1)
+
+df <- data %>% filter(!is.na(`CD11c+ median  :in:  CD11c+ Double Negative T Cells`))
+p3 <- make_violin_plot(df, 
+                       var   = "CD11c+ median  :in:  CD11c+ Double Negative T Cells", 
+                       ylab  = "MFI CD11c", 
+                       titulo= "CD11c+ DN T Cells",1)
+
+df <- data %>% filter(!is.na(`CD57+ median  :in:  CD57+ CD27+ CD8+ T Cells`))
+p4 <- make_violin_plot(df, 
+                       var   = "CD57+ median  :in:  CD57+ CD27+ CD8+ T Cells", 
+                       ylab  = "MFI CD57", 
+                       titulo= "CD57+ CD27+ CD8+ T Cells",1)
+var = "CD27+ Double Negative T Cells :in: Double Negative T Cells"
+df <- data %>% filter(!is.na(var))
+p5 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "% CD27+", 
+                       titulo= "DN T Cells",1)
+
+var = "Non-Classical Monocytes :in: Monocytes"
+df <- data %>% filter(!is.na(var))
+p6 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "% Non-Classical Monocytes", 
+                       titulo= "Monocytes",1)
+
+var = "HLA-DR+ median  :in:  HLA-DR+ CD27- CD4+ T Cells"
+df <- data %>% filter(!is.na(var))
+p7 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "MFI HLA-DR", 
+                       titulo= "HLA-DR+ CD27- CD4+ T Cells",1)
+
+var = "CD40+ Plasmacytoid Dendritic Cells :in: Plasmacytoid Dendritic Cells"
+df <- data %>% filter(!is.na(var))
+p8 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "% CD40+", 
+                       titulo= "pDCs",1)
+
+var = "CD40+ median  :in:  CD40+ CD21- CD11c+ B Cells"
+df <- data %>% filter(!is.na(var))
+p9 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "MFI CD40", 
+                       titulo= "CD40+ CD21- CD11c+ B Cells",1)
+
+var = "CD40+ median  :in:  CD40+ CD11c+ CD21- Double Negative B Cells"
+df <- data %>% filter(!is.na(var))
+p10 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "MFI CD40", 
+                       titulo= "CD40+ DN2 B Cells",1)
+
+final_figure <- ggarrange(
+  p1, p2, p3, p4, p5,
+  p6, p7, p8, p9, p10,
+  ncol = 5, nrow = 2,
+  common.legend = TRUE,  # usa a mesma legenda (para "MMF")
+  legend = "right"
+)
+svg("sup2.svg", width = 14.9, height = 5.5)
+final_figure
+dev.off()
+
+################################################################################
+# Suplementary fig 3
+data = read_csv("./data_aux/sup3.csv")
+
+# Mapeie: X = grupo, Y = variável contínua, fill = grupo (para as cores),
+# e use 'group = interaction(grupo, MMF)' e 'position_dodge' 
+# para obter dois violinos (No/Yes) por grupo.
+data$d3_group <- factor(data$d3_group, levels = c("Control", "Non-Positive", "Positive"))
+data$CS      <- factor(data$CS,      levels = c("No", "Yes"))
+
+library(tidyverse)
+library(ggsignif)  # para geom_signif()
+
+make_violin_plot <- function(df, var, ylab, titulo, esp) {
+  df_sub <- df %>%
+    select(d3_group, CS, all_of(var)) %>%
+    mutate(value = .data[[var]])
+  
+  df_max <- df_sub %>%
+    group_by(d3_group) %>%
+    summarise(maxY = max(value, na.rm = TRUE), .groups = "drop")
+  
+  compare_df <- df_sub %>%
+    filter(d3_group != "Control") %>%
+    group_by(d3_group) %>%
+    filter(n_distinct(CS) == 2) %>%
+    summarise(p.value = wilcox.test(value ~ CS)$p.value, .groups = "drop") %>%
+    mutate(
+      p.signif = case_when(
+        p.value < 0.0001 ~ "****",
+        p.value < 0.001  ~ "***",
+        p.value < 0.01   ~ "**",
+        p.value < 0.05   ~ "*",
+        TRUE             ~ "ns"
+      )
+    ) %>%
+    left_join(df_max, by = "d3_group") %>%
+    mutate(
+      x_group    = as.numeric(d3_group),
+      xmin       = x_group - 0.2,
+      xmax       = x_group + 0.2,
+      y_position = maxY * 1.10
+    ) %>%
+    filter(p.value < 0.05)
+  
+  p <- ggplot(df_sub, aes(x = d3_group, y = value, fill = d3_group)) +
+    geom_violin(
+      aes(group = interaction(d3_group, CS)),
+      position = position_dodge(width = 0.8),
+      width    = esp,
+      trim     = FALSE,
+      color    = "black",
+      adjust   = 2.5
+    ) +
+    geom_jitter(
+      aes(shape = CS),
+      position = position_jitterdodge(
+        dodge.width   = 0.8,
+        jitter.width  = 0.6,
+        jitter.height = 0
+      ),
+      size  = 1,
+      color = "black"
+    ) +
+    stat_summary(
+      aes(group = interaction(d3_group, CS)),
+      fun      = median,
+      geom     = "crossbar",
+      color    = "black",
+      width    = 0.3,
+      position = position_dodge(width = 0.8)
+    ) +
+    geom_signif(
+      data        = compare_df,
+      aes(
+        xmin       = xmin,
+        xmax       = xmax,
+        annotations= p.signif,
+        y_position = y_position
+      ),
+      manual      = TRUE,
+      inherit.aes = FALSE,
+      tip_length  = 0.01,
+      textsize    = 4,
+      size        = 0.5
+    ) +
+    scale_fill_manual(values = c(
+      "Control"      = "#7f7f7f",
+      "Non-Positive" = "#ff7f0e",
+      "Positive"     = "#1f77b4"
+    )) +
+    scale_shape_manual(values = c("No" = 16, "Yes" = 4)) +
+    theme_classic(base_size = 12) +
+    theme(
+      panel.border    = element_rect(color = "black", fill = NA),
+      legend.position = "right",
+      axis.text.x     = element_text(size = 8),
+      axis.text.y     = element_text(size = 8),
+      axis.title.x    = element_text(size = 10),
+      axis.title.y    = element_text(size = 10),
+      plot.title      = element_text(size = 10)
+    ) +
+    guides(fill = "none") +
+    labs(
+      title = titulo,
+      x     = NULL,
+      y     = ylab,
+      shape = "CS"
+    )
+  
+  if (nrow(compare_df) > 0) {
+    p <- p + expand_limits(y = max(compare_df$y_position) * 1.05)
+  }
+  
+  return(p)
+}
+
+data <- data %>% filter(!is.na(d3_group))
+df <- data %>% filter(!is.na(`HLA-DR+ median  :in:  HLA-DR+ Double Negative T Cells`))
+
+p1 <- make_violin_plot(df, 
+                       var   = "HLA-DR+ median  :in:  HLA-DR+ Double Negative T Cells", 
+                       ylab  = "MFI HLA-DR", 
+                       titulo= "HLA-DR+ DN T Cells",1)
+
+df <- data %>% filter(!is.na(`HLA-DR+ median  :in:  HLA-DR+ CD4+ T Cells`))
+p2 <- make_violin_plot(df, 
+                       var   = "HLA-DR+ median  :in:  HLA-DR+ CD4+ T Cells", 
+                       ylab  = "MFI HLA-DR", 
+                       titulo= "HLA-DR+ CD4+ T Cells",1)
+
+df <- data %>% filter(!is.na(`CD11c+ median  :in:  CD11c+ Double Negative T Cells`))
+p3 <- make_violin_plot(df, 
+                       var   = "CD11c+ median  :in:  CD11c+ Double Negative T Cells", 
+                       ylab  = "MFI CD11c", 
+                       titulo= "CD11c+ DN T Cells",1)
+
+df <- data %>% filter(!is.na(`CD57+ median  :in:  CD57+ CD27+ CD8+ T Cells`))
+p4 <- make_violin_plot(df, 
+                       var   = "CD57+ median  :in:  CD57+ CD27+ CD8+ T Cells", 
+                       ylab  = "MFI CD57", 
+                       titulo= "CD57+ CD27+ CD8+ T Cells",1)
+var = "CD27+ Double Negative T Cells :in: Double Negative T Cells"
+df <- data %>% filter(!is.na(var))
+p5 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "% CD27+", 
+                       titulo= "DN T Cells",1)
+
+var = "Non-Classical Monocytes :in: Monocytes"
+df <- data %>% filter(!is.na(var))
+p6 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "% Non-Classical Monocytes", 
+                       titulo= "Monocytes",1)
+
+var = "HLA-DR+ median  :in:  HLA-DR+ CD27- CD4+ T Cells"
+df <- data %>% filter(!is.na(var))
+p7 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "MFI HLA-DR", 
+                       titulo= "HLA-DR+ CD27- CD4+ T Cells",1)
+
+var = "CD40+ Plasmacytoid Dendritic Cells :in: Plasmacytoid Dendritic Cells"
+df <- data %>% filter(!is.na(var))
+p8 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "% CD40+", 
+                       titulo= "pDCs",1)
+
+var = "CD40+ median  :in:  CD40+ CD21- CD11c+ B Cells"
+df <- data %>% filter(!is.na(var))
+p9 <- make_violin_plot(df, 
+                       var   = var, 
+                       ylab  = "MFI CD40", 
+                       titulo= "CD40+ CD21- CD11c+ B Cells",1)
+
+var = "CD40+ median  :in:  CD40+ CD11c+ CD21- Double Negative B Cells"
+df <- data %>% filter(!is.na(var))
+p10 <- make_violin_plot(df, 
+                        var   = var, 
+                        ylab  = "MFI CD40", 
+                        titulo= "CD40+ DN2 B Cells",1)
+
+final_figure <- ggarrange(
+  p1, p2, p3, p4, p5,
+  p6, p7, p8, p9, p10,
+  ncol = 5, nrow = 2,
+  common.legend = TRUE,  # usa a mesma legenda (para "CS")
+  legend = "right"
+)
+svg("sup3.svg", width = 14.9, height = 5.5)
+final_figure
 dev.off()
