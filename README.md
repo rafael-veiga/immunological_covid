@@ -20,6 +20,7 @@ code used in paper "Systems vaccinology identifies medical and immunological cor
 * **table2a.R** : Performs the analysis and builds table 2.
 * **table2b.R** : Performs the analysis and builds table 2.
 * **table2c.R** : Performs the analysis and builds table 2.
+* **table2d.R** : Performs the analysis and builds table 2.
 * **Figure4.R** : Performs the necessary analyzes and creates figure 4.
 
 ## Necessary repositories
